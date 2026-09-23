@@ -6,13 +6,7 @@ export default async (req) => {
       Boolean(process.env.OPENAI_API_KEY)
     );
 
-    if (req.method !== "POST") {
-      console.log("HATALI METHOD:", req.method);
-
-      return new Response(
-        JSON.stringify({
-          error: "Sadece POST kullanılabilir."
-        }),
+    if (req.method !== "POST") 
         {
           status: 405,
           headers: {
