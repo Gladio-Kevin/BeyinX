@@ -1,15 +1,15 @@
 export default async (req) => {
-  if (req.method !== "POST") {
-    return new Response(
-      JSON.stringify({ error: "Sadece POST kullanılabilir." }),
-      {
-        status: 405,
-        headers: { "Content-Type": "application/json" }
-      }
-    );
-  }
-
   try {
+    if (req.method !== "POST") {
+      return new Response(
+        JSON.stringify({ error: "Sadece POST kullanılabilir." }),
+        {
+          status: 405,
+          headers: { "Content-Type": "application/json" }
+        }
+      );
+    }
+
     const body = await req.json();
 
     const messages = Array.isArray(body.messages)
@@ -31,7 +31,7 @@ export default async (req) => {
     if (!apiKey) {
       return new Response(
         JSON.stringify({
-          error: "OPENAI_API_KEY bulunamadı."
+          error: "OPENAI_API_KEY Netlify Function tarafından bulunamadı."
         }),
         {
           status: 500,
@@ -40,8 +40,11 @@ export default async (req) => {
       );
     }
 
-    const input = messages.map((m) => ({
-      role: m.role === "ai" ? "assistant" : "user",
+    const cleanMessages = messages.map((m) => ({
+      role:
+        m.role === "ai"
+          ? "assistant"
+          : "user",
       content: String(m.text || "")
     }));
 
@@ -49,15 +52,13 @@ export default async (req) => {
       "https://api.openai.com/v1/responses",
       {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`
         },
-
         body: JSON.stringify({
           model: "gpt-5-mini",
-          input: input
+          input: cleanMessages
         })
       }
     );
@@ -69,7 +70,7 @@ export default async (req) => {
         JSON.stringify({
           error:
             data?.error?.message ||
-            "OpenAI API hatası."
+            "OpenAI API hata verdi."
         }),
         {
           status: response.status,
@@ -80,9 +81,27 @@ export default async (req) => {
       );
     }
 
+    const answer =
+      data.output_text ||
+      "";
+
+    if (!answer) {
+      return new Response(
+        JSON.stringify({
+          error: "AI cevap üretmedi."
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+
     return new Response(
       JSON.stringify({
-        output_text: data.output_text || ""
+        output_text: answer
       }),
       {
         status: 200,
@@ -93,10 +112,11 @@ export default async (req) => {
     );
 
   } catch (error) {
-
     return new Response(
       JSON.stringify({
-        error: error.message || "Sunucu hatası."
+        error:
+          error?.message ||
+          "Beklenmeyen sunucu hatası."
       }),
       {
         status: 500,
