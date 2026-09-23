@@ -1,1 +1,1598 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BeyinX</title>
 
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:Arial,sans-serif;
+height:100vh;
+overflow:hidden;
+color:#171827;
+background:
+radial-gradient(circle at 20% 10%,#e8eaff 0,transparent 35%),
+radial-gradient(circle at 90% 80%,#dff7ff 0,transparent 35%),
+#f6f7fb;
+}
+
+button{cursor:pointer}
+
+#nameScreen{
+position:fixed;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:
+radial-gradient(circle at 20% 20%,#dfe3ff,transparent 40%),
+radial-gradient(circle at 80% 80%,#d9f7ff,transparent 40%),
+#f7f8fc;
+z-index:9999;
+}
+
+.nameBox{
+width:100%;
+max-width:390px;
+background:rgba(255,255,255,.88);
+backdrop-filter:blur(18px);
+border-radius:28px;
+padding:34px 25px;
+text-align:center;
+box-shadow:0 20px 60px rgba(70,75,130,.15);
+}
+
+.nameBrain{font-size:55px}
+
+.nameLogo{
+font-size:31px;
+font-weight:900;
+background:linear-gradient(90deg,#6366f1,#8b5cf6);
+-webkit-background-clip:text;
+color:transparent;
+margin:8px 0 24px;
+}
+
+.nameTitle{font-size:23px;font-weight:800}
+
+.nameDesc{
+color:#7b8090;
+font-size:14px;
+margin:8px 0 20px;
+}
+
+#nameInput,.modalInput{
+width:100%;
+height:53px;
+border:1px solid #dfe2eb;
+border-radius:15px;
+padding:0 15px;
+font-size:16px;
+outline:none;
+background:#fafbff;
+}
+
+.nameContinue,.newChatBtn{
+width:100%;
+height:53px;
+margin-top:12px;
+border:0;
+border-radius:15px;
+color:white;
+font-size:16px;
+font-weight:bold;
+background:linear-gradient(135deg,#6366f1,#8b5cf6);
+}
+
+#app{
+display:none;
+height:100vh;
+flex-direction:column;
+}
+
+.header{
+height:68px;
+flex-shrink:0;
+display:flex;
+align-items:center;
+padding:0 13px;
+background:rgba(255,255,255,.78);
+backdrop-filter:blur(18px);
+border-bottom:1px solid #ddd;
+}
+
+.menuBtn{
+width:44px;
+height:44px;
+border:0;
+border-radius:13px;
+background:transparent;
+font-size:25px;
+}
+
+.logo{
+margin-left:9px;
+font-size:23px;
+font-weight:900;
+}
+
+.logo span,.sideLogo span,.welcomeTitle span{
+color:#696cf4;
+}
+
+.chatWrapper{
+flex:1;
+overflow-y:auto;
+padding:20px 13px 180px;
+}
+
+.chat{
+max-width:820px;
+min-height:100%;
+margin:auto;
+display:flex;
+flex-direction:column;
+}
+
+.welcomeCard{
+margin:auto;
+width:min(600px,94%);
+padding:35px 25px;
+text-align:center;
+border-radius:28px;
+background:rgba(255,255,255,.76);
+backdrop-filter:blur(15px);
+box-shadow:0 15px 50px rgba(80,85,140,.08);
+}
+
+.welcomeIcon{
+width:70px;
+height:70px;
+margin:0 auto 16px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:22px;
+font-size:38px;
+background:linear-gradient(135deg,#e6e8ff,#eee8ff);
+}
+
+.welcomeTitle{
+font-size:25px;
+font-weight:900;
+margin-bottom:9px;
+}
+
+.welcomeText{
+color:#777d8d;
+line-height:1.6;
+font-size:14px;
+}
+
+.message{
+display:flex;
+margin-bottom:18px;
+}
+
+.message.ai{justify-content:flex-start}
+.message.user{justify-content:flex-end}
+
+.bubble{
+max-width:78%;
+padding:13px 16px;
+border-radius:18px;
+font-size:16px;
+line-height:1.55;
+white-space:pre-wrap;
+word-break:break-word;
+}
+
+.ai .bubble{
+background:rgba(255,255,255,.9);
+border:1px solid #e3e5ec;
+}
+
+.user .bubble{
+color:white;
+background:linear-gradient(135deg,#6366f1,#805cf5);
+}
+
+.inputContainer{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+padding:10px 10px 18px;
+background:linear-gradient(
+transparent,
+rgba(246,247,251,.96) 28%
+);
+}
+
+.inputBox{
+max-width:820px;
+min-height:82px;
+margin:auto;
+display:flex;
+align-items:flex-end;
+padding:8px;
+background:rgba(255,255,255,.94);
+backdrop-filter:blur(18px);
+border:1px solid #dedfea;
+border-radius:22px;
+box-shadow:0 10px 35px rgba(60,65,110,.1);
+}
+
+textarea{
+flex:1;
+min-height:62px;
+max-height:145px;
+resize:none;
+border:0;
+outline:0;
+padding:13px 10px;
+font:16px Arial;
+background:transparent;
+}
+
+.sendBtn{
+width:50px;
+height:50px;
+border:0;
+border-radius:15px;
+color:white;
+font-size:20px;
+background:linear-gradient(135deg,#6366f1,#805cf5);
+}
+
+.overlay{
+position:fixed;
+inset:0;
+background:rgba(20,22,40,.25);
+display:none;
+z-index:20;
+}
+
+.overlay.active{display:block}
+
+.sidebar{
+position:fixed;
+top:0;
+left:-310px;
+width:290px;
+height:100vh;
+background:rgba(255,255,255,.97);
+z-index:30;
+transition:.25s;
+box-shadow:8px 0 30px #0002;
+display:flex;
+flex-direction:column;
+}
+
+.sidebar.active{left:0}
+
+.sideHeader{
+height:68px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 15px;
+border-bottom:1px solid #e7e8ee;
+}
+
+.sideLogo{
+font-size:21px;
+font-weight:900;
+}
+
+.closeBtn{
+width:38px;
+height:38px;
+border:0;
+border-radius:11px;
+background:#f0f1f6;
+font-size:22px;
+}
+
+.newChatBtn{
+margin:15px;
+height:48px;
+}
+
+.historyTitle{
+padding:0 16px 9px;
+color:#969aa8;
+font-size:12px;
+font-weight:bold;
+}
+
+.history{
+flex:1;
+overflow-y:auto;
+}
+
+.historyItem{
+margin:3px 8px;
+padding:13px 14px;
+border-radius:12px;
+font-size:14px;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.emptyHistory{
+padding:15px;
+color:#999;
+}
+
+.logout{
+margin:12px 15px 18px;
+height:45px;
+border:1px solid #e0e2e8;
+background:white;
+border-radius:12px;
+}
+
+.modal{
+position:fixed;
+inset:0;
+background:#14162859;
+display:none;
+align-items:center;
+justify-content:center;
+padding:20px;
+z-index:100;
+}
+
+.modal.active{display:flex}
+
+.modalBox{
+width:100%;
+max-width:380px;
+background:white;
+border-radius:23px;
+padding:25px;
+}
+
+.modalTitle{
+font-size:21px;
+font-weight:800;
+margin-bottom:8px;
+}
+
+.modalDesc{
+color:#777d89;
+font-size:14px;
+margin-bottom:18px;
+}
+
+.modalButtons{
+display:flex;
+gap:9px;
+margin-top:12px;
+}
+
+.cancelBtn,.confirmBtn{
+flex:1;
+height:47px;
+border:0;
+border-radius:12px;
+font-weight:bold;
+}
+
+.cancelBtn{background:#eef0f4}
+
+.confirmBtn{
+background:#6366f1;
+color:white;
+}
+
+.actionMenu{
+position:fixed;
+width:220px;
+background:white;
+border:1px solid #e0e2e7;
+border-radius:15px;
+padding:6px;
+box-shadow:0 12px 35px #0003;
+display:none;
+z-index:500;
+}
+
+.actionMenu.active{display:block}
+
+.actionBtn{
+width:100%;
+height:45px;
+border:0;
+background:white;
+border-radius:10px;
+text-align:left;
+padding:0 13px;
+font-size:14px;
+}
+
+.deleteBtn{color:#e53935}
+</style>
+</head>
+
+<body>
+
+<div id="nameScreen">
+<div class="nameBox">
+
+<div class="nameBrain">🧠</div>
+
+<div class="nameLogo">
+BeyinX
+</div>
+
+<div class="nameTitle">
+İsim koy
+</div>
+
+<div class="nameDesc">
+BeyinX seni bu isimle tanıyacak.
+</div>
+
+<input
+id="nameInput"
+maxlength="30"
+placeholder="İsmini yaz..."
+onkeydown="nameEnter(event)"
+>
+
+<button
+class="nameContinue"
+onclick="saveName()">
+Devam et
+</button>
+
+</div>
+</div>
+
+
+<div id="app">
+
+<header class="header">
+
+<button
+class="menuBtn"
+onclick="openSidebar()">
+☰
+</button>
+
+<div class="logo">
+🧠 Beyin<span>X</span>
+</div>
+
+</header>
+
+
+<main class="chatWrapper">
+
+<div
+id="chat"
+class="chat">
+</div>
+
+</main>
+
+
+<div class="inputContainer">
+
+<div class="inputBox">
+
+<textarea
+id="messageInput"
+placeholder="Mesajını yaz..."
+onkeydown="sendEnter(event)"
+></textarea>
+
+<button
+class="sendBtn"
+onclick="sendMessage()">
+➤
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div
+id="overlay"
+class="overlay"
+onclick="closeSidebar()">
+</div>
+
+
+<aside
+id="sidebar"
+class="sidebar">
+
+<div class="sideHeader">
+
+<div class="sideLogo">
+🧠 Beyin<span>X</span>
+</div>
+
+<button
+class="closeBtn"
+onclick="closeSidebar()">
+×
+</button>
+
+</div>
+
+
+<button
+class="newChatBtn"
+onclick="newChat()">
+＋ Yeni sohbet
+</button>
+
+
+<div class="historyTitle">
+SOHBETLER
+</div>
+
+
+<div
+id="history"
+class="history">
+</div>
+
+
+<button
+class="logout"
+onclick="logout()">
+İsmi değiştir / çıkış
+</button>
+
+</aside>
+
+
+<div
+id="newChatModal"
+class="modal">
+
+<div class="modalBox">
+
+<div class="modalTitle">
+Yeni sohbet
+</div>
+
+<div class="modalDesc">
+Bu sohbete bir isim koy.
+</div>
+
+<input
+id="newChatInput"
+class="modalInput"
+maxlength="60"
+placeholder="Sohbet adı..."
+>
+
+<div class="modalButtons">
+
+<button
+class="cancelBtn"
+onclick="closeModal('newChatModal')">
+İptal
+</button>
+
+<button
+class="confirmBtn"
+onclick="createChat()">
+Oluştur
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div
+id="renameModal"
+class="modal">
+
+<div class="modalBox">
+
+<div class="modalTitle">
+Chatin ismini değiştir
+</div>
+
+<div class="modalDesc">
+Yeni isim kaydedilecek.
+</div>
+
+<input
+id="renameInput"
+class="modalInput"
+maxlength="60"
+placeholder="Yeni isim..."
+>
+
+<div class="modalButtons">
+
+<button
+class="cancelBtn"
+onclick="closeModal('renameModal')">
+İptal
+</button>
+
+<button
+class="confirmBtn"
+onclick="saveRename()">
+Kaydet
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div
+id="actionMenu"
+class="actionMenu">
+
+<button
+class="actionBtn"
+onclick="renameChat()">
+✏️ Chatin ismini değiştir
+</button>
+
+<button
+class="actionBtn deleteBtn"
+onclick="deleteChat()">
+🗑️ Chati sil
+</button>
+
+</div>
+
+
+<script>
+
+/* =========================
+   WORKER
+========================= */
+
+const API_URL =
+"https://lucky-silence-5a2c.denek-001-omnrie.workers.dev/";
+
+
+/* =========================
+   VERİLER
+========================= */
+
+let username =
+localStorage.getItem("beyinx_username");
+
+let chats =
+JSON.parse(
+localStorage.getItem("beyinx_chats") || "[]"
+);
+
+let currentChat = null;
+let selectedChatId = null;
+
+
+/* =========================
+   AÇILIŞ
+========================= */
+
+if(username){
+
+document
+.getElementById("nameScreen")
+.style.display="none";
+
+document
+.getElementById("app")
+.style.display="flex";
+
+showWelcome();
+loadHistory();
+
+}
+
+
+/* =========================
+   İSİM
+========================= */
+
+function saveName(){
+
+const name =
+document
+.getElementById("nameInput")
+.value
+.trim();
+
+if(!name){
+
+alert("İsmini yaz.");
+return;
+
+}
+
+username=name;
+
+localStorage.setItem(
+"beyinx_username",
+username
+);
+
+document
+.getElementById("nameScreen")
+.style.display="none";
+
+document
+.getElementById("app")
+.style.display="flex";
+
+showWelcome();
+loadHistory();
+
+}
+
+
+function nameEnter(event){
+
+if(event.key==="Enter"){
+
+event.preventDefault();
+
+saveName();
+
+}
+
+}
+
+
+/* =========================
+   KARŞILAMA
+========================= */
+
+function showWelcome(){
+
+const chat =
+document.getElementById("chat");
+
+chat.innerHTML="";
+
+const card =
+document.createElement("div");
+
+card.className="welcomeCard";
+
+card.innerHTML=`
+
+<div class="welcomeIcon">
+🧠
+</div>
+
+<div class="welcomeTitle">
+Merhaba
+<span>
+${escapeHTML(username)}
+</span>
+</div>
+
+<div class="welcomeText">
+BeyinX burada.
+Ne yapmak istiyorsan yaz,
+başlayalım.
+</div>
+
+`;
+
+chat.appendChild(card);
+
+}
+
+
+/* =========================
+   MESAJ
+========================= */
+
+function addMessage(text,type){
+
+const chat =
+document.getElementById("chat");
+
+const message =
+document.createElement("div");
+
+message.className =
+"message " + type;
+
+const bubble =
+document.createElement("div");
+
+bubble.className="bubble";
+
+bubble.textContent =
+String(text).trim();
+
+message.appendChild(bubble);
+
+chat.appendChild(message);
+
+const wrapper =
+document.querySelector(".chatWrapper");
+
+wrapper.scrollTop =
+wrapper.scrollHeight;
+
+return bubble;
+
+}
+
+
+/* =========================
+   YENİ CHAT
+========================= */
+
+function newChat(){
+
+closeSidebar();
+
+document
+.getElementById("newChatModal")
+.classList.add("active");
+
+document
+.getElementById("newChatInput")
+.value="";
+
+setTimeout(()=>{
+
+document
+.getElementById("newChatInput")
+.focus();
+
+},100);
+
+}
+
+
+function createChat(){
+
+const title =
+document
+.getElementById("newChatInput")
+.value
+.trim();
+
+if(!title){
+
+alert("Sohbete bir isim koy.");
+return;
+
+}
+
+currentChat={
+
+id:Date.now(),
+title:title,
+messages:[]
+
+};
+
+chats.unshift(currentChat);
+
+saveChats();
+
+document
+.getElementById("chat")
+.innerHTML="";
+
+closeModal("newChatModal");
+
+loadHistory();
+
+}
+
+
+/* =========================
+   AI MESAJ
+========================= */
+
+async function sendMessage(){
+
+const input =
+document.getElementById("messageInput");
+
+const text =
+input.value.trim();
+
+if(!text)return;
+
+
+/* CHAT YOKSA OLUŞTUR */
+
+if(!currentChat){
+
+currentChat={
+
+id:Date.now(),
+
+title:
+text.substring(0,60),
+
+messages:[]
+
+};
+
+chats.unshift(currentChat);
+
+saveChats();
+
+loadHistory();
+
+}
+
+
+/* KULLANICI */
+
+addMessage(
+text,
+"user"
+);
+
+currentChat.messages.push({
+
+role:"user",
+text:text
+
+});
+
+saveChats();
+
+input.value="";
+
+
+/* BEKLEME */
+
+const aiBubble =
+addMessage(
+"BeyinX düşünüyor...",
+"ai"
+);
+
+
+try{
+
+/*
+====================================
+HTML → CLOUDFLARE WORKER → OPENAI
+====================================
+*/
+
+const response =
+await fetch(
+API_URL,
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":
+"application/json"
+
+},
+
+body:
+JSON.stringify({
+
+messages:
+currentChat.messages
+
+})
+
+}
+);
+
+
+/*
+RESPONSE'U ÖNCE TEXT ALIYORUZ.
+Böylece Worker hata döndürürse
+gerçek hatayı görebiliriz.
+*/
+
+const raw =
+await response.text();
+
+let data;
+
+try{
+
+data =
+JSON.parse(raw);
+
+}
+catch{
+
+throw new Error(
+"Worker JSON göndermedi: " +
+raw
+);
+
+}
+
+
+if(!response.ok){
+
+throw new Error(
+
+data.error ||
+"Worker hata verdi."
+
+);
+
+}
+
+
+const answer =
+
+data.output_text ||
+
+data.reply ||
+
+data.message;
+
+
+if(!answer){
+
+throw new Error(
+"Worker cevap döndürmedi."
+);
+
+}
+
+
+aiBubble.textContent =
+answer;
+
+
+currentChat.messages.push({
+
+role:"ai",
+text:answer
+
+});
+
+
+saveChats();
+
+
+}
+catch(error){
+
+aiBubble.textContent =
+"BeyinX bağlantı hatası:\n\n" +
+error.message;
+
+}
+
+}
+
+
+/* =========================
+   ENTER
+========================= */
+
+function sendEnter(event){
+
+if(
+event.key==="Enter" &&
+!event.shiftKey
+){
+
+event.preventDefault();
+
+sendMessage();
+
+}
+
+}
+
+
+/* =========================
+   KAYDET
+========================= */
+
+function saveChats(){
+
+localStorage.setItem(
+
+"beyinx_chats",
+
+JSON.stringify(chats)
+
+);
+
+}
+
+
+/* =========================
+   GEÇMİŞ
+========================= */
+
+function loadHistory(){
+
+const history =
+document.getElementById("history");
+
+history.innerHTML="";
+
+
+if(chats.length===0){
+
+history.innerHTML=`
+
+<div class="emptyHistory">
+Henüz sohbet yok.
+</div>
+
+`;
+
+return;
+
+}
+
+
+chats.forEach(chat=>{
+
+const item =
+document.createElement("div");
+
+item.className="historyItem";
+
+item.textContent =
+"💬 " + chat.title;
+
+
+item.addEventListener(
+"click",
+()=>{
+
+openChat(chat.id);
+
+}
+);
+
+
+item.addEventListener(
+"contextmenu",
+event=>{
+
+event.preventDefault();
+
+showActionMenu(
+
+chat.id,
+event.clientX,
+event.clientY
+
+);
+
+}
+);
+
+
+/* TELEFONDA UZUN BASMA */
+
+let timer;
+
+item.addEventListener(
+"touchstart",
+()=>{
+
+timer=setTimeout(()=>{
+
+showActionMenu(
+chat.id,
+20,
+120
+);
+
+},600);
+
+},
+{passive:true}
+);
+
+item.addEventListener(
+"touchend",
+()=>{
+
+clearTimeout(timer);
+
+}
+);
+
+
+history.appendChild(item);
+
+});
+
+}
+
+
+/* =========================
+   CHAT AÇ
+========================= */
+
+function openChat(id){
+
+const chat =
+chats.find(
+c=>c.id===id
+);
+
+if(!chat)return;
+
+currentChat=chat;
+
+document
+.getElementById("chat")
+.innerHTML="";
+
+
+chat.messages.forEach(
+message=>{
+
+addMessage(
+
+message.text,
+message.role
+
+);
+
+}
+);
+
+closeSidebar();
+
+}
+
+
+/* =========================
+   UZUN BASMA
+========================= */
+
+function showActionMenu(
+id,
+x,
+y
+){
+
+selectedChatId=id;
+
+const menu =
+document.getElementById(
+"actionMenu"
+);
+
+menu.style.left =
+Math.min(
+x,
+window.innerWidth-230
+)+"px";
+
+menu.style.top =
+Math.min(
+y,
+window.innerHeight-110
+)+"px";
+
+menu.classList.add(
+"active"
+);
+
+}
+
+
+/* =========================
+   İSİM DEĞİŞTİR
+========================= */
+
+function renameChat(){
+
+const chat =
+chats.find(
+c=>c.id===selectedChatId
+);
+
+if(!chat)return;
+
+document
+.getElementById("renameInput")
+.value=chat.title;
+
+document
+.getElementById("actionMenu")
+.classList.remove(
+"active"
+);
+
+document
+.getElementById("renameModal")
+.classList.add(
+"active"
+);
+
+}
+
+
+function saveRename(){
+
+const name =
+document
+.getElementById("renameInput")
+.value
+.trim();
+
+if(!name){
+
+alert("Yeni ismi yaz.");
+return;
+
+}
+
+const chat =
+chats.find(
+c=>c.id===selectedChatId
+);
+
+if(!chat)return;
+
+chat.title=name;
+
+saveChats();
+
+closeModal("renameModal");
+
+selectedChatId=null;
+
+loadHistory();
+
+}
+
+
+/* =========================
+   CHAT SİL
+========================= */
+
+function deleteChat(){
+
+if(
+selectedChatId===null
+)return;
+
+const index =
+chats.findIndex(
+c=>c.id===selectedChatId
+);
+
+if(index===-1)return;
+
+const deletedId =
+selectedChatId;
+
+chats.splice(
+index,
+1
+);
+
+saveChats();
+
+
+if(
+currentChat &&
+currentChat.id===deletedId
+){
+
+currentChat=null;
+
+showWelcome();
+
+}
+
+
+selectedChatId=null;
+
+document
+.getElementById(
+"actionMenu"
+)
+.classList.remove(
+"active"
+);
+
+loadHistory();
+
+}
+
+
+/* =========================
+   MENÜ
+========================= */
+
+function openSidebar(){
+
+document
+.getElementById("sidebar")
+.classList.add(
+"active"
+);
+
+document
+.getElementById("overlay")
+.classList.add(
+"active"
+);
+
+loadHistory();
+
+}
+
+
+function closeSidebar(){
+
+document
+.getElementById("sidebar")
+.classList.remove(
+"active"
+);
+
+document
+.getElementById("overlay")
+.classList.remove(
+"active"
+);
+
+document
+.getElementById("actionMenu")
+.classList.remove(
+"active"
+);
+
+}
+
+
+/* =========================
+   MODAL
+========================= */
+
+function closeModal(id){
+
+document
+.getElementById(id)
+.classList.remove(
+"active"
+);
+
+}
+
+
+/* =========================
+   ÇIKIŞ
+========================= */
+
+function logout(){
+
+localStorage.removeItem(
+"beyinx_username"
+);
+
+username=null;
+
+currentChat=null;
+
+document
+.getElementById("app")
+.style.display="none";
+
+document
+.getElementById("nameScreen")
+.style.display="flex";
+
+document
+.getElementById("nameInput")
+.value="";
+
+}
+
+
+/* =========================
+   GÜVENLİ METİN
+========================= */
+
+function escapeHTML(text){
+
+return String(text)
+
+.replace(
+/&/g,
+"&amp;"
+)
+
+.replace(
+/</g,
+"&lt;"
+)
+
+.replace(
+/>/g,
+"&gt;"
+)
+
+.replace(
+/"/g,
+"&quot;"
+)
+
+.replace(
+/'/g,
+"&#039;"
+);
+
+}
+
+
+/* =========================
+   MENÜ DIŞI
+========================= */
+
+document.addEventListener(
+"click",
+event=>{
+
+const menu =
+document.getElementById(
+"actionMenu"
+);
+
+if(
+
+menu.classList.contains(
+"active"
+) &&
+
+!menu.contains(
+event.target
+)
+
+){
+
+menu.classList.remove(
+"active"
+);
+
+selectedChatId=null;
+
+}
+
+}
+);
+
+</script>
+
+</body>
+  </html>
