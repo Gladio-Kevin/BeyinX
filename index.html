@@ -452,6 +452,7 @@ Devam et
 </div>
 </div>
 
+
 <div id="app">
 
 <header class="header">
@@ -468,11 +469,16 @@ onclick="openSidebar()">
 
 </header>
 
+
 <main class="chatWrapper">
 
-<div id="chat" class="chat"></div>
+<div
+id="chat"
+class="chat">
+</div>
 
 </main>
+
 
 <div class="inputContainer">
 
@@ -496,9 +502,17 @@ onclick="sendMessage()">
 
 </div>
 
-<div id="overlay" class="overlay" onclick="closeSidebar()"></div>
 
-<aside id="sidebar" class="sidebar">
+<div
+id="overlay"
+class="overlay"
+onclick="closeSidebar()">
+</div>
+
+
+<aside
+id="sidebar"
+class="sidebar">
 
 <div class="sideHeader">
 
@@ -514,17 +528,24 @@ onclick="closeSidebar()">
 
 </div>
 
+
 <button
 class="newChatBtn"
 onclick="newChat()">
 ＋ Yeni sohbet
 </button>
 
+
 <div class="historyTitle">
 SOHBETLER
 </div>
 
-<div id="history" class="history"></div>
+
+<div
+id="history"
+class="history">
+</div>
+
 
 <button
 class="logout"
@@ -534,11 +555,16 @@ onclick="logout()">
 
 </aside>
 
-<div id="newChatModal" class="modal">
+
+<div
+id="newChatModal"
+class="modal">
 
 <div class="modalBox">
 
-<div class="modalTitle">Yeni sohbet</div>
+<div class="modalTitle">
+Yeni sohbet
+</div>
 
 <div class="modalDesc">
 Bu sohbete bir isim koy.
@@ -571,7 +597,10 @@ Oluştur
 
 </div>
 
-<div id="renameModal" class="modal">
+
+<div
+id="renameModal"
+class="modal">
 
 <div class="modalBox">
 
@@ -610,7 +639,10 @@ Kaydet
 
 </div>
 
-<div id="actionMenu" class="actionMenu">
+
+<div
+id="actionMenu"
+class="actionMenu">
 
 <button
 class="actionBtn"
@@ -626,7 +658,20 @@ onclick="deleteChat()">
 
 </div>
 
+
 <script>
+
+/* =========================
+   BEYINX API
+   ========================= */
+
+const API_URL =
+"/.netlify/functions/chat";
+
+
+/* =========================
+   VERİLER
+   ========================= */
 
 let username =
 localStorage.getItem("beyinx_username");
@@ -640,13 +685,19 @@ let currentChat = null;
 let selectedChatId = null;
 
 
-/* AÇILIŞ */
+/* =========================
+   AÇILIŞ
+   ========================= */
 
 if(username){
 
-document.getElementById("nameScreen").style.display="none";
+document
+.getElementById("nameScreen")
+.style.display="none";
 
-document.getElementById("app").style.display="flex";
+document
+.getElementById("app")
+.style.display="flex";
 
 showWelcome();
 loadHistory();
@@ -654,12 +705,17 @@ loadHistory();
 }
 
 
-/* İSİM */
+/* =========================
+   İSİM
+   ========================= */
 
 function saveName(){
 
 const name =
-document.getElementById("nameInput").value.trim();
+document
+.getElementById("nameInput")
+.value
+.trim();
 
 if(!name){
 
@@ -675,9 +731,13 @@ localStorage.setItem(
 username
 );
 
-document.getElementById("nameScreen").style.display="none";
+document
+.getElementById("nameScreen")
+.style.display="none";
 
-document.getElementById("app").style.display="flex";
+document
+.getElementById("app")
+.style.display="flex";
 
 showWelcome();
 loadHistory();
@@ -698,7 +758,9 @@ saveName();
 }
 
 
-/* KARŞILAMA */
+/* =========================
+   KARŞILAMA
+   ========================= */
 
 function showWelcome(){
 
@@ -720,7 +782,9 @@ card.innerHTML=`
 
 <div class="welcomeTitle">
 Merhaba
-<span>${escapeHTML(username)}</span>
+<span>
+${escapeHTML(username)}
+</span>
 </div>
 
 <div class="welcomeText">
@@ -736,7 +800,9 @@ chat.appendChild(card);
 }
 
 
-/* MESAJ */
+/* =========================
+   MESAJ
+   ========================= */
 
 function addMessage(text,type){
 
@@ -772,7 +838,9 @@ return bubble;
 }
 
 
-/* YENİ CHAT */
+/* =========================
+   YENİ CHAT
+   ========================= */
 
 function newChat(){
 
@@ -835,9 +903,11 @@ loadHistory();
 }
 
 
-/* MESAJ GÖNDER */
+/* =========================
+   AI MESAJ
+   ========================= */
 
-function sendMessage(){
+async function sendMessage(){
 
 const input =
 document.getElementById("messageInput");
@@ -872,7 +942,7 @@ loadHistory();
 }
 
 
-/* KULLANICI MESAJI */
+/* KULLANICI */
 
 addMessage(
 text,
@@ -891,19 +961,98 @@ saveChats();
 input.value="";
 
 
-/*
-   WORKER YOK.
-   API YOK.
-   Şimdilik yerel cevap.
-*/
+/* AI BEKLİYOR */
 
-const answer =
-"BeyinX AI bağlantısı henüz kurulmadı.";
-
+const aiBubble =
 addMessage(
-answer,
+"BeyinX düşünüyor...",
 "ai"
 );
+
+
+try{
+
+const response =
+await fetch(
+API_URL,
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":
+"application/json"
+
+},
+
+body:
+JSON.stringify({
+
+messages:
+currentChat.messages
+
+})
+
+}
+);
+
+
+/* CEVABI AL */
+
+const raw =
+await response.text();
+
+let data;
+
+try{
+
+data =
+JSON.parse(raw);
+
+}
+catch{
+
+throw new Error(
+"Sunucu JSON göndermedi: " +
+raw
+);
+
+}
+
+
+if(!response.ok){
+
+throw new Error(
+
+data.error ||
+"Netlify Function hata verdi."
+
+);
+
+}
+
+
+const answer =
+data.output_text ||
+data.reply ||
+data.message;
+
+
+if(!answer){
+
+throw new Error(
+"BeyinX cevap döndürmedi."
+);
+
+}
+
+
+aiBubble.textContent =
+answer;
+
+
+/* AI MESAJINI KAYDET */
 
 currentChat.messages.push({
 
@@ -914,10 +1063,22 @@ text:answer
 
 saveChats();
 
+
+}
+catch(error){
+
+aiBubble.textContent =
+"BeyinX bağlantı hatası:\n\n" +
+error.message;
+
+}
+
 }
 
 
-/* ENTER */
+/* =========================
+   ENTER
+   ========================= */
 
 function sendEnter(event){
 
@@ -935,7 +1096,9 @@ sendMessage();
 }
 
 
-/* KAYDET */
+/* =========================
+   KAYDET
+   ========================= */
 
 function saveChats(){
 
@@ -950,7 +1113,9 @@ JSON.stringify(chats)
 }
 
 
-/* GEÇMİŞ */
+/* =========================
+   GEÇMİŞ
+   ========================= */
 
 function loadHistory(){
 
@@ -1003,9 +1168,11 @@ event=>{
 event.preventDefault();
 
 showActionMenu(
+
 chat.id,
 event.clientX,
 event.clientY
+
 );
 
 }
@@ -1051,7 +1218,9 @@ history.appendChild(item);
 }
 
 
-/* CHAT AÇ */
+/* =========================
+   CHAT AÇ
+   ========================= */
 
 function openChat(id){
 
@@ -1073,8 +1242,10 @@ chat.messages.forEach(
 message=>{
 
 addMessage(
+
 message.text,
 message.role
+
 );
 
 }
@@ -1085,7 +1256,9 @@ closeSidebar();
 }
 
 
-/* UZUN BASMA */
+/* =========================
+   UZUN BASMA
+   ========================= */
 
 function showActionMenu(
 id,
@@ -1119,7 +1292,9 @@ menu.classList.add(
 }
 
 
-/* İSİM DEĞİŞTİR */
+/* =========================
+   İSİM DEĞİŞTİR
+   ========================= */
 
 function renameChat(){
 
@@ -1184,7 +1359,9 @@ loadHistory();
 }
 
 
-/* CHAT SİL */
+/* =========================
+   CHAT SİL
+   ========================= */
 
 function deleteChat(){
 
@@ -1237,7 +1414,9 @@ loadHistory();
 }
 
 
-/* MENÜ */
+/* =========================
+   MENÜ
+   ========================= */
 
 function openSidebar(){
 
@@ -1281,7 +1460,9 @@ document
 }
 
 
-/* MODAL */
+/* =========================
+   MODAL
+   ========================= */
 
 function closeModal(id){
 
@@ -1294,7 +1475,9 @@ document
 }
 
 
-/* ÇIKIŞ */
+/* =========================
+   ÇIKIŞ
+   ========================= */
 
 function logout(){
 
@@ -1321,22 +1504,45 @@ document
 }
 
 
-/* GÜVENLİ METİN */
+/* =========================
+   GÜVENLİ METİN
+   ========================= */
 
 function escapeHTML(text){
 
 return String(text)
 
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
+.replace(
+/&/g,
+"&amp;"
+)
+
+.replace(
+/</g,
+"&lt;"
+)
+
+.replace(
+/>/g,
+"&gt;"
+)
+
+.replace(
+/"/g,
+"&quot;"
+)
+
+.replace(
+/'/g,
+"&#039;"
+);
 
 }
 
 
-/* MENÜ DIŞI */
+/* =========================
+   MENÜ DIŞI
+   ========================= */
 
 document.addEventListener(
 "click",
@@ -1349,13 +1555,19 @@ document.getElementById(
 
 if(
 
-menu.classList.contains("active") &&
+menu.classList.contains(
+"active"
+) &&
 
-!menu.contains(event.target)
+!menu.contains(
+event.target
+)
 
 ){
 
-menu.classList.remove("active");
+menu.classList.remove(
+"active"
+);
 
 selectedChatId=null;
 
