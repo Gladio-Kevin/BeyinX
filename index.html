@@ -12,15 +12,45 @@ margin:0;
 padding:0
 }
 
+:root{
+--bg:#f6f7fb;
+--text:#171827;
+--card:rgba(255,255,255,.88);
+--header:rgba(255,255,255,.78);
+--border:#dedfea;
+--soft:#eef0f6;
+--muted:#777d8d;
+--purple:#6366f1;
+--purple2:#805cf5;
+}
+
+body.dark{
+--bg:#11131d;
+--text:#f2f3fa;
+--card:rgba(28,30,43,.92);
+--header:rgba(20,22,33,.88);
+--border:#343747;
+--soft:#292c3b;
+--muted:#a8adbd;
+}
+
 body{
 font-family:Arial,sans-serif;
 height:100vh;
 overflow:hidden;
-color:#171827;
+color:var(--text);
 background:
 radial-gradient(circle at 20% 10%,#e8eaff 0,transparent 35%),
 radial-gradient(circle at 90% 80%,#dff7ff 0,transparent 35%),
-#f6f7fb;
+var(--bg);
+transition:background .25s,color .25s;
+}
+
+body.dark{
+background:
+radial-gradient(circle at 20% 10%,#252650 0,transparent 35%),
+radial-gradient(circle at 90% 80%,#173641 0,transparent 35%),
+var(--bg);
 }
 
 button{
@@ -114,9 +144,9 @@ flex-shrink:0;
 display:flex;
 align-items:center;
 padding:0 13px;
-background:rgba(255,255,255,.78);
+background:var(--header);
 backdrop-filter:blur(18px);
-border-bottom:1px solid #ddd;
+border-bottom:1px solid var(--border);
 }
 
 .menuBtn{
@@ -126,6 +156,7 @@ border:0;
 border-radius:13px;
 background:transparent;
 font-size:25px;
+color:var(--text);
 }
 
 .logo{
@@ -174,7 +205,7 @@ width:min(600px,94%);
 padding:35px 25px;
 text-align:center;
 border-radius:28px;
-background:rgba(255,255,255,.76);
+background:var(--card);
 backdrop-filter:blur(15px);
 box-shadow:0 15px 50px rgba(80,85,140,.08);
 }
@@ -198,7 +229,7 @@ margin-bottom:9px;
 }
 
 .welcomeText{
-color:#777d8d;
+color:var(--muted);
 line-height:1.6;
 font-size:14px;
 }
@@ -233,8 +264,8 @@ word-break:break-word;
 }
 
 .ai .bubble{
-background:rgba(255,255,255,.9);
-border:1px solid #e3e5ec;
+background:var(--card);
+border:1px solid var(--border);
 }
 
 .user .bubble{
@@ -259,7 +290,7 @@ margin-top:7px;
 
 .messageOptions:hover,
 .messageOptions:active{
-background:#e9eaf1;
+background:var(--soft);
 opacity:1;
 }
 
@@ -276,6 +307,13 @@ rgba(246,247,251,.96) 28%
 z-index:10;
 }
 
+body.dark .inputContainer{
+background:linear-gradient(
+transparent,
+rgba(17,19,29,.96) 28%
+);
+}
+
 .inputBox{
 max-width:820px;
 min-height:82px;
@@ -283,9 +321,9 @@ margin:auto;
 display:flex;
 align-items:flex-end;
 padding:8px;
-background:rgba(255,255,255,.94);
+background:var(--card);
 backdrop-filter:blur(18px);
-border:1px solid #dedfea;
+border:1px solid var(--border);
 border-radius:22px;
 box-shadow:0 10px 35px rgba(60,65,110,.1);
 }
@@ -300,6 +338,11 @@ outline:0;
 padding:13px 10px;
 font:16px Arial;
 background:transparent;
+color:var(--text);
+}
+
+textarea::placeholder{
+color:var(--muted);
 }
 
 .sendBtn{
@@ -335,7 +378,7 @@ top:0;
 left:-310px;
 width:290px;
 height:100vh;
-background:rgba(255,255,255,.97);
+background:var(--card);
 z-index:30;
 transition:.25s;
 box-shadow:8px 0 30px #0002;
@@ -353,7 +396,7 @@ display:flex;
 align-items:center;
 justify-content:space-between;
 padding:0 15px;
-border-bottom:1px solid #e7e8ee;
+border-bottom:1px solid var(--border);
 }
 
 .sideLogo{
@@ -369,8 +412,9 @@ width:38px;
 height:38px;
 border:0;
 border-radius:11px;
-background:#f0f1f6;
+background:var(--soft);
 font-size:22px;
+color:var(--text);
 }
 
 .newChatBtn{
@@ -403,7 +447,7 @@ text-overflow:ellipsis;
 }
 
 .historyItem:hover{
-background:#f0f1f6;
+background:var(--soft);
 }
 
 .emptyHistory{
@@ -415,9 +459,21 @@ color:#999;
 margin:5px 15px 12px;
 height:45px;
 flex-shrink:0;
-border:1px solid #e0e2e8;
-background:white;
+border:1px solid var(--border);
+background:var(--card);
+color:var(--text);
 border-radius:12px;
+}
+
+.settingsBtn{
+margin:0 15px 8px;
+height:45px;
+flex-shrink:0;
+border:1px solid var(--border);
+background:var(--card);
+color:var(--text);
+border-radius:12px;
+font-weight:bold;
 }
 
 .modal{
@@ -438,9 +494,10 @@ display:flex;
 .modalBox{
 width:100%;
 max-width:380px;
-background:white;
+background:var(--card);
 border-radius:23px;
 padding:25px;
+color:var(--text);
 }
 
 .modalTitle{
@@ -450,7 +507,7 @@ margin-bottom:8px;
 }
 
 .modalDesc{
-color:#777d89;
+color:var(--muted);
 font-size:14px;
 margin-bottom:18px;
 }
@@ -471,7 +528,8 @@ font-weight:bold;
 }
 
 .cancelBtn{
-background:#eef0f4;
+background:var(--soft);
+color:var(--text);
 }
 
 .confirmBtn{
@@ -482,8 +540,8 @@ color:white;
 .actionMenu{
 position:fixed;
 width:220px;
-background:white;
-border:1px solid #e0e2e7;
+background:var(--card);
+border:1px solid var(--border);
 border-radius:15px;
 padding:6px;
 box-shadow:0 12px 35px #0003;
@@ -499,7 +557,8 @@ display:block;
 width:100%;
 height:45px;
 border:0;
-background:white;
+background:transparent;
+color:var(--text);
 border-radius:10px;
 text-align:left;
 padding:0 13px;
@@ -507,7 +566,7 @@ font-size:14px;
 }
 
 .actionBtn:hover{
-background:#f1f2f6;
+background:var(--soft);
 }
 
 .deleteBtn{
@@ -533,6 +592,80 @@ z-index:1000;
 .toast.show{
 opacity:1;
 transform:translateX(-50%) translateY(0);
+}
+
+/* AYARLAR */
+
+.settingsBox{
+max-width:430px;
+max-height:85vh;
+overflow-y:auto;
+}
+
+.settingGroup{
+margin-top:18px;
+}
+
+.settingLabel{
+font-size:13px;
+font-weight:bold;
+color:var(--muted);
+margin-bottom:8px;
+}
+
+.settingRow{
+display:flex;
+gap:8px;
+}
+
+.settingChoice{
+flex:1;
+height:45px;
+border:1px solid var(--border);
+border-radius:12px;
+background:var(--card);
+color:var(--text);
+font-weight:bold;
+}
+
+.settingChoice.active{
+background:#6366f1;
+color:white;
+border-color:#6366f1;
+}
+
+.dangerButton{
+width:100%;
+height:47px;
+border:0;
+border-radius:12px;
+background:#ffe9e9;
+color:#e53935;
+font-weight:bold;
+}
+
+.aboutCard{
+padding:15px;
+border-radius:15px;
+background:var(--soft);
+line-height:1.6;
+font-size:14px;
+color:var(--muted);
+}
+
+.aboutCard strong{
+color:var(--text);
+}
+
+.settingsClose{
+width:100%;
+height:47px;
+margin-top:15px;
+border:0;
+border-radius:12px;
+background:#6366f1;
+color:white;
+font-weight:bold;
 }
 
 @media(max-width:500px){
@@ -695,6 +828,13 @@ class="history">
 
 
 <button
+class="settingsBtn"
+onclick="openSettings()">
+⚙️ Ayarlar
+</button>
+
+
+<button
 class="logout"
 onclick="logout()">
 İsmi değiştir / çıkış
@@ -702,6 +842,8 @@ onclick="logout()">
 
 </aside>
 
+
+<!-- YENİ CHAT -->
 
 <div
 id="newChatModal"
@@ -745,6 +887,8 @@ Oluştur
 </div>
 
 
+<!-- YENİDEN ADLANDIR -->
+
 <div
 id="renameModal"
 class="modal">
@@ -787,19 +931,150 @@ Kaydet
 </div>
 
 
+<!-- AYARLAR -->
+
+<div
+id="settingsModal"
+class="modal">
+
+<div class="modalBox settingsBox">
+
+<div class="modalTitle">
+⚙️ BeyinX Ayarları
+</div>
+
+<div class="modalDesc">
+Uygulamanın görünümünü ve bazı tercihlerini düzenle.
+</div>
+
+
+<div class="settingGroup">
+
+<div class="settingLabel">
+TEMA
+</div>
+
+<div class="settingRow">
+
+<button
+id="themeSystem"
+class="settingChoice"
+onclick="setTheme('system')">
+Sistem
+</button>
+
+<button
+id="themeLight"
+class="settingChoice"
+onclick="setTheme('light')">
+☀️ Açık
+</button>
+
+<button
+id="themeDark"
+class="settingChoice"
+onclick="setTheme('dark')">
+🌙 Koyu
+</button>
+
+</div>
+
+</div>
+
+
+<div class="settingGroup">
+
+<div class="settingLabel">
+YAZI BOYUTU
+</div>
+
+<div class="settingRow">
+
+<button
+class="settingChoice"
+onclick="setFontSize('small')">
+Küçük
+</button>
+
+<button
+class="settingChoice"
+onclick="setFontSize('normal')">
+Normal
+</button>
+
+<button
+class="settingChoice"
+onclick="setFontSize('large')">
+Büyük
+</button>
+
+</div>
+
+</div>
+
+
+<div class="settingGroup">
+
+<div class="settingLabel">
+BEYİNX HAKKINDA
+</div>
+
+<div class="aboutCard">
+
+<strong>🧠 BeyinX</strong><br>
+
+Türkçe yapay zeka sohbet uygulaması.<br><br>
+
+<strong>Sürüm:</strong> 1.0.0 BETA<br>
+
+<strong>Kurucu:</strong> Ömer, diğer adıyla Kevin<br><br>
+
+BeyinX geliştirme aşamasındadır. 🚀
+
+</div>
+
+</div>
+
+
+<div class="settingGroup">
+
+<div class="settingLabel">
+VERİLER
+</div>
+
+<button
+class="dangerButton"
+onclick="clearAllChats()">
+🗑️ Tüm sohbetleri sil
+</button>
+
+</div>
+
+
+<button
+class="settingsClose"
+onclick="closeModal('settingsModal')">
+Tamam
+</button>
+
+</div>
+
+</div>
+
+
+<!-- CHAT MENÜSÜ -->
+
 <div
 id="actionMenu"
 class="actionMenu">
 
 <button
-id="actionRename"
 class="actionBtn"
 onclick="renameChat()">
 ✏️ Chatin ismini değiştir
 </button>
 
 <button
-id="actionDelete"
 class="actionBtn deleteBtn"
 onclick="deleteChat()">
 🗑️ Chati sil
@@ -807,6 +1082,8 @@ onclick="deleteChat()">
 
 </div>
 
+
+<!-- MESAJ MENÜSÜ -->
 
 <div
 id="messageMenu"
@@ -854,8 +1131,150 @@ localStorage.getItem("beyinx_chats") || "[]"
 
 let currentChat = null;
 let selectedChatId = null;
-
 let selectedMessageIndex = null;
+
+
+/* AYARLAR */
+
+let savedTheme =
+localStorage.getItem("beyinx_theme") || "system";
+
+let savedFont =
+localStorage.getItem("beyinx_font") || "normal";
+
+
+function applyTheme(){
+
+if(savedTheme==="dark"){
+
+document.body.classList.add("dark");
+
+}else if(savedTheme==="light"){
+
+document.body.classList.remove("dark");
+
+}else{
+
+if(
+window.matchMedia &&
+window.matchMedia(
+"(prefers-color-scheme: dark)"
+).matches
+){
+
+document.body.classList.add("dark");
+
+}else{
+
+document.body.classList.remove("dark");
+
+}
+
+}
+
+}
+
+
+function setTheme(theme){
+
+savedTheme=theme;
+
+localStorage.setItem(
+"beyinx_theme",
+theme
+);
+
+applyTheme();
+updateSettingsButtons();
+
+}
+
+
+function setFontSize(size){
+
+savedFont=size;
+
+localStorage.setItem(
+"beyinx_font",
+size
+);
+
+let value="16px";
+
+if(size==="small"){
+value="14px";
+}
+
+if(size==="large"){
+value="18px";
+}
+
+document
+.querySelectorAll(".bubble")
+.forEach(el=>{
+el.style.fontSize=value;
+});
+
+updateSettingsButtons();
+
+}
+
+
+function updateSettingsButtons(){
+
+document
+.querySelectorAll(".settingChoice")
+.forEach(btn=>{
+btn.classList.remove("active");
+});
+
+const themeButton =
+document.getElementById(
+"theme" +
+savedTheme.charAt(0).toUpperCase() +
+savedTheme.slice(1)
+);
+
+if(themeButton){
+themeButton.classList.add("active");
+}
+
+}
+
+
+function openSettings(){
+
+closeSidebar();
+
+document
+.getElementById("settingsModal")
+.classList.add("active");
+
+updateSettingsButtons();
+
+}
+
+
+/* SİSTEM TEMASI DEĞİŞİRSE */
+
+if(window.matchMedia){
+
+window
+.matchMedia("(prefers-color-scheme: dark)")
+.addEventListener(
+"change",
+()=>{
+
+if(savedTheme==="system"){
+applyTheme();
+}
+
+}
+);
+
+}
+
+applyTheme();
 
 
 /* AÇILIŞ */
@@ -953,9 +1372,9 @@ Merhaba
 </div>
 
 <div class="welcomeText">
-BeyinX burada.
+BeyinX burada.<br>
 Ne yapmak istiyorsan yaz,
-başlayalım.
+başlayalım. 🚀
 </div>
 
 `;
@@ -1018,6 +1437,14 @@ bubble.className="bubble";
 bubble.textContent =
 String(text).trim();
 
+if(savedFont==="small"){
+bubble.style.fontSize="14px";
+}
+
+if(savedFont==="large"){
+bubble.style.fontSize="18px";
+}
+
 content.appendChild(bubble);
 
 const options =
@@ -1042,16 +1469,7 @@ options
 };
 
 message.appendChild(content);
-
-if(type==="user"){
-
 message.appendChild(options);
-
-}else{
-
-message.appendChild(options);
-
-}
 
 chat.appendChild(message);
 
@@ -1238,9 +1656,6 @@ if(
 aiMessage.role!=="ai"
 )return;
 
-
-/* Önceki kullanıcı mesajını bul */
-
 let userIndex =
 aiIndex - 1;
 
@@ -1255,16 +1670,15 @@ userIndex--;
 
 if(userIndex < 0){
 
-showToast("Yeniden oluşturulacak mesaj bulunamadı.");
+showToast(
+"Yeniden oluşturulacak mesaj bulunamadı."
+);
 
 closeMessageMenu();
 
 return;
 
 }
-
-
-/* AI mesajını kaldır */
 
 currentChat.messages.splice(
 aiIndex,
@@ -1276,9 +1690,6 @@ saveChats();
 closeMessageMenu();
 
 renderCurrentChat();
-
-
-/* Yeni AI mesajı için düşünülüyor */
 
 const thinkingBubble =
 addMessage(
@@ -1376,7 +1787,7 @@ selectedMessageIndex=null;
 }
 
 
-/* MEVCUT CHATİ YENİDEN ÇİZ */
+/* CHATİ YENİDEN ÇİZ */
 
 function renderCurrentChat(){
 
@@ -1482,7 +1893,7 @@ loadHistory();
 }
 
 
-/* MESAJ GÖNDER */
+/* MESAJ */
 
 async function sendMessage(){
 
@@ -1496,9 +1907,6 @@ const text =
 input.value.trim();
 
 if(!text)return;
-
-
-/* CHAT YOKSA */
 
 if(!currentChat){
 
@@ -1521,9 +1929,6 @@ loadHistory();
 
 }
 
-
-/* KULLANICI MESAJI */
-
 const userIndex =
 currentChat.messages.length;
 
@@ -1545,9 +1950,6 @@ saveChats();
 input.value="";
 
 sendBtn.disabled=true;
-
-
-/* DÜŞÜNÜYOR */
 
 const thinkingIndex =
 currentChat.messages.length;
@@ -1607,14 +2009,8 @@ throw new Error(
 
 }
 
-
-/* CEVABI GÖSTER */
-
 thinkingBubble.textContent =
 answer;
-
-
-/* AI MESAJINI KAYDET */
 
 currentChat.messages.push({
 
@@ -1668,11 +2064,8 @@ sendMessage();
 function saveChats(){
 
 localStorage.setItem(
-
 "beyinx_chats",
-
 JSON.stringify(chats)
-
 );
 
 }
@@ -1734,9 +2127,6 @@ event.clientY
 
 }
 );
-
-
-/* TELEFONDA UZUN BASMA */
 
 let timer;
 
@@ -1821,14 +2211,12 @@ y,
 window.innerHeight-110
 )+"px";
 
-menu.classList.add(
-"active"
-);
+menu.classList.add("active");
 
 }
 
 
-/* CHAT İSMİ DEĞİŞTİR */
+/* İSİM DEĞİŞTİR */
 
 function renameChat(){
 
@@ -1845,15 +2233,11 @@ document
 
 document
 .getElementById("actionMenu")
-.classList.remove(
-"active"
-);
+.classList.remove("active");
 
 document
 .getElementById("renameModal")
-.classList.add(
-"active"
-);
+.classList.add("active");
 
 }
 
@@ -1932,14 +2316,44 @@ showWelcome();
 selectedChatId=null;
 
 document
-.getElementById(
-"actionMenu"
-)
-.classList.remove(
-"active"
-);
+.getElementById("actionMenu")
+.classList.remove("active");
 
 loadHistory();
+
+}
+
+
+/* TÜM SOHBETLERİ SİL */
+
+function clearAllChats(){
+
+if(chats.length===0){
+
+showToast("Silinecek sohbet yok.");
+
+return;
+
+}
+
+const ok =
+confirm(
+"Tüm sohbetler silinsin mi?\n\nBu işlem geri alınamaz."
+);
+
+if(!ok)return;
+
+chats=[];
+
+currentChat=null;
+
+saveChats();
+
+showWelcome();
+
+loadHistory();
+
+showToast("Tüm sohbetler silindi.");
 
 }
 
@@ -1950,15 +2364,11 @@ function openSidebar(){
 
 document
 .getElementById("sidebar")
-.classList.add(
-"active"
-);
+.classList.add("active");
 
 document
 .getElementById("overlay")
-.classList.add(
-"active"
-);
+.classList.add("active");
 
 loadHistory();
 
@@ -1969,21 +2379,15 @@ function closeSidebar(){
 
 document
 .getElementById("sidebar")
-.classList.remove(
-"active"
-);
+.classList.remove("active");
 
 document
 .getElementById("overlay")
-.classList.remove(
-"active"
-);
+.classList.remove("active");
 
 document
 .getElementById("actionMenu")
-.classList.remove(
-"active"
-);
+.classList.remove("active");
 
 closeMessageMenu();
 
@@ -1996,9 +2400,7 @@ function closeModal(id){
 
 document
 .getElementById(id)
-.classList.remove(
-"active"
-);
+.classList.remove("active");
 
 }
 
@@ -2100,6 +2502,10 @@ closeMessageMenu();
 
 document
 .getElementById("actionMenu")
+.classList.remove("active");
+
+document
+.getElementById("settingsModal")
 .classList.remove("active");
 
 }
