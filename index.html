@@ -6,20 +6,41 @@
 <title>BeyinX</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
 
 body{
 font-family:Arial,sans-serif;
 height:100vh;
 overflow:hidden;
 color:#171827;
+
 background:
-radial-gradient(circle at 20% 10%,#e8eaff 0,transparent 35%),
-radial-gradient(circle at 90% 80%,#dff7ff 0,transparent 35%),
+radial-gradient(
+circle at 20% 10%,
+#e8eaff 0,
+transparent 35%
+),
+radial-gradient(
+circle at 90% 80%,
+#dff7ff 0,
+transparent 35%
+),
 #f6f7fb;
 }
 
-button{cursor:pointer}
+button{
+cursor:pointer;
+}
+
+
+/* =========================
+   İSİM EKRANI
+========================= */
 
 #nameScreen{
 position:fixed;
@@ -28,32 +49,59 @@ display:flex;
 align-items:center;
 justify-content:center;
 padding:20px;
+
 background:
-radial-gradient(circle at 20% 20%,#dfe3ff,transparent 40%),
-radial-gradient(circle at 80% 80%,#d9f7ff,transparent 40%),
+radial-gradient(
+circle at 20% 20%,
+#dfe3ff,
+transparent 40%
+),
+radial-gradient(
+circle at 80% 80%,
+#d9f7ff,
+transparent 40%
+),
 #f7f8fc;
+
 z-index:9999;
 }
 
 .nameBox{
 width:100%;
 max-width:390px;
+
 background:rgba(255,255,255,.88);
+
 backdrop-filter:blur(18px);
+
 border-radius:28px;
+
 padding:34px 25px;
+
 text-align:center;
-box-shadow:0 20px 60px rgba(70,75,130,.15);
+
+box-shadow:
+0 20px 60px rgba(70,75,130,.15);
 }
 
-.nameBrain{font-size:55px}
+.nameBrain{
+font-size:55px;
+}
 
 .nameLogo{
 font-size:31px;
 font-weight:900;
-background:linear-gradient(90deg,#6366f1,#8b5cf6);
+
+background:
+linear-gradient(
+90deg,
+#6366f1,
+#8b5cf6
+);
+
 -webkit-background-clip:text;
 color:transparent;
+
 margin:8px 0 24px;
 }
 
@@ -68,118 +116,255 @@ font-size:14px;
 margin:8px 0 20px;
 }
 
-#nameInput,.modalInput{
+#nameInput,
+.modalInput{
 width:100%;
 height:53px;
+
 border:1px solid #dfe2eb;
+
 border-radius:15px;
+
 padding:0 15px;
+
 font-size:16px;
+
 outline:none;
+
 background:#fafbff;
 }
 
-.nameContinue,.newChatBtn{
+.nameContinue,
+.newChatBtn{
 width:100%;
-height:53px;
+height:50px;
+
 margin-top:12px;
+
 border:0;
+
 border-radius:15px;
+
 color:white;
-font-size:16px;
+
+font-size:15px;
+
 font-weight:bold;
-background:linear-gradient(135deg,#6366f1,#8b5cf6);
+
+background:
+linear-gradient(
+135deg,
+#6366f1,
+#8b5cf6
+);
 }
+
+
+/* =========================
+   APP
+========================= */
 
 #app{
 display:none;
+
 height:100vh;
+
 flex-direction:column;
 }
 
+
+/* =========================
+   HEADER
+========================= */
+
 .header{
 height:68px;
+
 flex-shrink:0;
+
 display:flex;
+
 align-items:center;
+
 padding:0 13px;
-background:rgba(255,255,255,.78);
+
+background:
+rgba(255,255,255,.78);
+
 backdrop-filter:blur(18px);
+
 border-bottom:1px solid #ddd;
 }
 
 .menuBtn{
 width:44px;
 height:44px;
+
 border:0;
+
 border-radius:13px;
+
 background:transparent;
+
 font-size:25px;
 }
 
 .logo{
 margin-left:9px;
+
 font-size:23px;
+
 font-weight:900;
+
+display:flex;
+
+align-items:center;
+
+gap:5px;
+
+white-space:nowrap;
+
+letter-spacing:-.5px;
 }
 
-.logo span,
-.sideLogo span,
-.welcomeTitle span{
+.logoName{
+display:inline-flex;
+
+align-items:center;
+
+gap:0;
+}
+
+.logoX{
 color:#696cf4;
 }
 
+.betaBadge{
+font-size:9px;
+
+font-weight:800;
+
+letter-spacing:.6px;
+
+color:#696cf4;
+
+background:
+rgba(105,108,244,.10);
+
+border:1px solid
+rgba(105,108,244,.20);
+
+padding:4px 7px;
+
+border-radius:7px;
+
+position:relative;
+
+top:-1px;
+}
+
+
+/* =========================
+   CHAT
+========================= */
+
 .chatWrapper{
 flex:1;
+
 overflow-y:auto;
-padding:20px 13px 180px;
+
+padding:
+20px
+13px
+180px;
 }
 
 .chat{
 max-width:820px;
+
 min-height:100%;
+
 margin:auto;
+
 display:flex;
+
 flex-direction:column;
 }
 
 .welcomeCard{
 margin:auto;
+
 width:min(600px,94%);
+
 padding:35px 25px;
+
 text-align:center;
+
 border-radius:28px;
-background:rgba(255,255,255,.76);
+
+background:
+rgba(255,255,255,.76);
+
 backdrop-filter:blur(15px);
-box-shadow:0 15px 50px rgba(80,85,140,.08);
+
+box-shadow:
+0 15px 50px
+rgba(80,85,140,.08);
 }
 
 .welcomeIcon{
 width:70px;
 height:70px;
-margin:0 auto 16px;
+
+margin:
+0 auto 16px;
+
 display:flex;
+
 align-items:center;
+
 justify-content:center;
+
 border-radius:22px;
+
 font-size:38px;
-background:linear-gradient(135deg,#e6e8ff,#eee8ff);
+
+background:
+linear-gradient(
+135deg,
+#e6e8ff,
+#eee8ff
+);
 }
 
 .welcomeTitle{
 font-size:25px;
+
 font-weight:900;
+
 margin-bottom:9px;
+}
+
+.welcomeTitle span{
+color:#696cf4;
 }
 
 .welcomeText{
 color:#777d8d;
+
 line-height:1.6;
+
 font-size:14px;
 }
 
+
+/* =========================
+   MESAJLAR
+========================= */
+
 .message{
 display:flex;
+
 margin-bottom:18px;
 }
 
@@ -193,31 +378,74 @@ justify-content:flex-end;
 
 .bubble{
 max-width:78%;
+
 padding:13px 16px;
+
 border-radius:18px;
+
 font-size:16px;
+
 line-height:1.55;
+
 white-space:pre-wrap;
+
 word-break:break-word;
 }
 
 .ai .bubble{
-background:rgba(255,255,255,.9);
-border:1px solid #e3e5ec;
+background:
+rgba(255,255,255,.9);
+
+border:
+1px solid #e3e5ec;
 }
 
 .user .bubble{
 color:white;
-background:linear-gradient(135deg,#6366f1,#805cf5);
+
+background:
+linear-gradient(
+135deg,
+#6366f1,
+#805cf5
+);
 }
+
+
+/* AI AYIRICI */
+
+.aiDivider{
+height:1px;
+
+width:100%;
+
+background:
+rgba(110,115,130,.20);
+
+margin:12px 0;
+}
+
+
+/* =========================
+   INPUT
+========================= */
 
 .inputContainer{
 position:fixed;
+
 bottom:0;
+
 left:0;
+
 width:100%;
-padding:10px 10px 18px;
-background:linear-gradient(
+
+padding:
+10px
+10px
+18px;
+
+background:
+linear-gradient(
 transparent,
 rgba(246,247,251,.96) 28%
 );
@@ -225,50 +453,93 @@ rgba(246,247,251,.96) 28%
 
 .inputBox{
 max-width:820px;
+
 min-height:82px;
+
 margin:auto;
+
 display:flex;
+
 align-items:flex-end;
+
 padding:8px;
-background:rgba(255,255,255,.94);
+
+background:
+rgba(255,255,255,.94);
+
 backdrop-filter:blur(18px);
-border:1px solid #dedfea;
+
+border:
+1px solid #dedfea;
+
 border-radius:22px;
-box-shadow:0 10px 35px rgba(60,65,110,.1);
+
+box-shadow:
+0 10px 35px
+rgba(60,65,110,.1);
 }
 
 textarea{
 flex:1;
+
 min-height:62px;
+
 max-height:145px;
+
 resize:none;
+
 border:0;
+
 outline:0;
+
 padding:13px 10px;
+
 font:16px Arial;
+
 background:transparent;
 }
 
 .sendBtn{
 width:50px;
 height:50px;
+
 border:0;
+
 border-radius:15px;
+
 color:white;
+
 font-size:20px;
-background:linear-gradient(135deg,#6366f1,#805cf5);
+
+background:
+linear-gradient(
+135deg,
+#6366f1,
+#805cf5
+);
 }
 
 .sendBtn:disabled{
 opacity:.6;
+
 cursor:not-allowed;
 }
 
+
+/* =========================
+   OVERLAY
+========================= */
+
 .overlay{
 position:fixed;
+
 inset:0;
-background:rgba(20,22,40,.25);
+
+background:
+rgba(20,22,40,.25);
+
 display:none;
+
 z-index:20;
 }
 
@@ -276,17 +547,34 @@ z-index:20;
 display:block;
 }
 
+
+/* =========================
+   SIDEBAR
+========================= */
+
 .sidebar{
 position:fixed;
+
 top:0;
+
 left:-310px;
+
 width:290px;
+
 height:100vh;
-background:rgba(255,255,255,.97);
+
+background:
+rgba(255,255,255,.97);
+
 z-index:30;
+
 transition:.25s;
-box-shadow:8px 0 30px #0002;
+
+box-shadow:
+8px 0 30px #0002;
+
 display:flex;
+
 flex-direction:column;
 }
 
@@ -296,75 +584,224 @@ left:0;
 
 .sideHeader{
 height:68px;
+
 display:flex;
+
 align-items:center;
+
 justify-content:space-between;
+
 padding:0 15px;
-border-bottom:1px solid #e7e8ee;
+
+border-bottom:
+1px solid #e7e8ee;
 }
 
 .sideLogo{
 font-size:21px;
+
 font-weight:900;
+
+display:flex;
+
+align-items:center;
+
+gap:5px;
+}
+
+.sideLogoName{
+display:inline-flex;
+
+align-items:center;
+
+gap:0;
+}
+
+.sideLogoX{
+color:#696cf4;
+}
+
+.sideBeta{
+font-size:8px;
+
+font-weight:800;
+
+letter-spacing:.5px;
+
+color:#696cf4;
+
+background:
+rgba(105,108,244,.10);
+
+border:
+1px solid rgba(105,108,244,.20);
+
+padding:3px 6px;
+
+border-radius:6px;
 }
 
 .closeBtn{
 width:38px;
 height:38px;
+
 border:0;
+
 border-radius:11px;
+
 background:#f0f1f6;
+
 font-size:22px;
 }
 
 .newChatBtn{
-margin:15px;
+margin:
+14px
+15px
+13px;
+
 height:48px;
+
+font-size:14px;
 }
 
 .historyTitle{
-padding:0 16px 9px;
+padding:
+0 16px
+9px;
+
 color:#969aa8;
+
 font-size:12px;
+
 font-weight:bold;
 }
 
 .history{
 flex:1;
+
 overflow-y:auto;
+
+padding-bottom:5px;
 }
+
+
+/* =========================
+   CHAT HISTORY ITEM
+========================= */
 
 .historyItem{
 margin:3px 8px;
-padding:13px 14px;
+
+min-height:48px;
+
+padding:
+0 6px
+0 14px;
+
 border-radius:12px;
+
 font-size:14px;
+
+display:flex;
+
+align-items:center;
+
+gap:5px;
+}
+
+.historyItem:hover{
+background:#f3f4f8;
+}
+
+.historyTitleText{
+flex:1;
+
+min-width:0;
+
 white-space:nowrap;
+
 overflow:hidden;
+
 text-overflow:ellipsis;
+}
+
+.historyDots{
+width:34px;
+height:34px;
+
+flex-shrink:0;
+
+border:0;
+
+border-radius:9px;
+
+background:transparent;
+
+font-size:20px;
+
+color:#777d8d;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+}
+
+.historyDots:hover{
+background:#e9ebf2;
 }
 
 .emptyHistory{
 padding:15px;
+
 color:#999;
 }
 
+
+/* ÇIKIŞ BUTONU */
+
 .logout{
-margin:12px 15px 18px;
+margin:
+8px
+15px
+30px;
+
 height:45px;
-border:1px solid #e0e2e8;
+
+flex-shrink:0;
+
+border:
+1px solid #e0e2e8;
+
 background:white;
+
 border-radius:12px;
+
+font-size:14px;
 }
+
+
+/* =========================
+   MODAL
+========================= */
 
 .modal{
 position:fixed;
+
 inset:0;
+
 background:#14162859;
+
 display:none;
+
 align-items:center;
+
 justify-content:center;
+
 padding:20px;
+
 z-index:100;
 }
 
@@ -374,35 +811,50 @@ display:flex;
 
 .modalBox{
 width:100%;
+
 max-width:380px;
+
 background:white;
+
 border-radius:23px;
+
 padding:25px;
 }
 
 .modalTitle{
 font-size:21px;
+
 font-weight:800;
+
 margin-bottom:8px;
 }
 
 .modalDesc{
 color:#777d89;
+
 font-size:14px;
+
 margin-bottom:18px;
 }
 
 .modalButtons{
 display:flex;
+
 gap:9px;
+
 margin-top:12px;
 }
 
-.cancelBtn,.confirmBtn{
+.cancelBtn,
+.confirmBtn{
 flex:1;
+
 height:47px;
+
 border:0;
+
 border-radius:12px;
+
 font-weight:bold;
 }
 
@@ -412,18 +864,34 @@ background:#eef0f4;
 
 .confirmBtn{
 background:#6366f1;
+
 color:white;
 }
 
+
+/* =========================
+   ACTION MENU
+========================= */
+
 .actionMenu{
 position:fixed;
+
 width:220px;
+
 background:white;
-border:1px solid #e0e2e7;
+
+border:
+1px solid #e0e2e7;
+
 border-radius:15px;
+
 padding:6px;
-box-shadow:0 12px 35px #0003;
+
+box-shadow:
+0 12px 35px #0003;
+
 display:none;
+
 z-index:500;
 }
 
@@ -433,28 +901,48 @@ display:block;
 
 .actionBtn{
 width:100%;
+
 height:45px;
+
 border:0;
+
 background:white;
+
 border-radius:10px;
+
 text-align:left;
+
 padding:0 13px;
+
 font-size:14px;
+}
+
+.actionBtn:hover{
+background:#f3f4f8;
 }
 
 .deleteBtn{
 color:#e53935;
 }
+
 </style>
 </head>
 
+
 <body>
+
+
+<!-- =========================
+     İSİM EKRANI
+========================= -->
 
 <div id="nameScreen">
 
 <div class="nameBox">
 
-<div class="nameBrain">🧠</div>
+<div class="nameBrain">
+🧠
+</div>
 
 <div class="nameLogo">
 BeyinX
@@ -486,7 +974,12 @@ Devam et
 </div>
 
 
+<!-- =========================
+     APP
+========================= -->
+
 <div id="app">
+
 
 <header class="header">
 
@@ -496,8 +989,19 @@ onclick="openSidebar()">
 ☰
 </button>
 
+
 <div class="logo">
-🧠 Beyin<span>X</span>
+
+🧠
+
+<span class="logoName">
+Beyin<span class="logoX">X</span>
+</span>
+
+<span class="betaBadge">
+BETA
+</span>
+
 </div>
 
 </header>
@@ -505,7 +1009,10 @@ onclick="openSidebar()">
 
 <main class="chatWrapper">
 
-<div id="chat" class="chat"></div>
+<div
+id="chat"
+class="chat">
+</div>
 
 </main>
 
@@ -534,6 +1041,10 @@ onclick="sendMessage()">
 </div>
 
 
+<!-- =========================
+     OVERLAY
+========================= -->
+
 <div
 id="overlay"
 class="overlay"
@@ -541,15 +1052,32 @@ onclick="closeSidebar()">
 </div>
 
 
+<!-- =========================
+     SIDEBAR
+========================= -->
+
 <aside
 id="sidebar"
 class="sidebar">
 
+
 <div class="sideHeader">
 
+
 <div class="sideLogo">
-🧠 Beyin<span>X</span>
+
+🧠
+
+<span class="sideLogoName">
+Beyin<span class="sideLogoX">X</span>
+</span>
+
+<span class="sideBeta">
+BETA
+</span>
+
 </div>
+
 
 <button
 class="closeBtn"
@@ -584,8 +1112,13 @@ onclick="logout()">
 İsmi değiştir / çıkış
 </button>
 
+
 </aside>
 
+
+<!-- =========================
+     YENİ CHAT MODAL
+========================= -->
 
 <div
 id="newChatModal"
@@ -629,6 +1162,10 @@ Oluştur
 </div>
 
 
+<!-- =========================
+     RENAME MODAL
+========================= -->
+
 <div
 id="renameModal"
 class="modal">
@@ -671,6 +1208,10 @@ Kaydet
 </div>
 
 
+<!-- =========================
+     ACTION MENU
+========================= -->
+
 <div
 id="actionMenu"
 class="actionMenu">
@@ -692,19 +1233,33 @@ onclick="deleteChat()">
 
 <script>
 
+
+/* =========================
+   DEĞİŞKENLER
+========================= */
+
 let username =
-localStorage.getItem("beyinx_username");
+localStorage.getItem(
+"beyinx_username"
+);
+
 
 let chats =
 JSON.parse(
-localStorage.getItem("beyinx_chats") || "[]"
+localStorage.getItem(
+"beyinx_chats"
+) || "[]"
 );
 
+
 let currentChat = null;
+
 let selectedChatId = null;
 
 
-/* AÇILIŞ */
+/* =========================
+   AÇILIŞ
+========================= */
 
 if(username){
 
@@ -712,17 +1267,22 @@ document
 .getElementById("nameScreen")
 .style.display="none";
 
+
 document
 .getElementById("app")
 .style.display="flex";
 
+
 showWelcome();
+
 loadHistory();
 
 }
 
 
-/* İSİM */
+/* =========================
+   İSİM
+========================= */
 
 function saveName(){
 
@@ -732,29 +1292,37 @@ document
 .value
 .trim();
 
+
 if(!name){
 
 alert("İsmini yaz.");
+
 return;
 
 }
 
+
 username=name;
+
 
 localStorage.setItem(
 "beyinx_username",
 username
 );
 
+
 document
 .getElementById("nameScreen")
 .style.display="none";
+
 
 document
 .getElementById("app")
 .style.display="flex";
 
+
 showWelcome();
+
 loadHistory();
 
 }
@@ -773,19 +1341,25 @@ saveName();
 }
 
 
-/* KARŞILAMA */
+/* =========================
+   KARŞILAMA
+========================= */
 
 function showWelcome(){
 
 const chat =
 document.getElementById("chat");
 
+
 chat.innerHTML="";
+
 
 const card =
 document.createElement("div");
 
+
 card.className="welcomeCard";
+
 
 card.innerHTML=`
 
@@ -795,79 +1369,187 @@ card.innerHTML=`
 
 <div class="welcomeTitle">
 Merhaba
-<span>${escapeHTML(username)}</span>
+<span>
+${escapeHTML(username)}
+</span>
 </div>
 
 <div class="welcomeText">
-BeyinX burada.
+BeyinX burada.<br>
 Ne yapmak istiyorsan yaz,
 başlayalım.
 </div>
 
 `;
 
+
 chat.appendChild(card);
 
 }
 
 
-/* MESAJ */
+/* =========================
+   AI METNİ RENDER
+========================= */
+
+function renderAIText(bubble,text){
+
+bubble.innerHTML="";
+
+
+const lines =
+String(text)
+.trim()
+.split("\n");
+
+
+lines.forEach(
+(line,index)=>{
+
+const clean =
+line.trim();
+
+
+/*
+Çizgi / ayraç yakala
+*/
+
+if(
+clean.length >= 5 &&
+(
+/^-{5,}$/.test(clean) ||
+/^_{5,}$/.test(clean) ||
+/^={5,}$/.test(clean) ||
+/^\/-{3,}\\?$/.test(clean)
+)
+){
+
+const divider =
+document.createElement("div");
+
+divider.className =
+"aiDivider";
+
+bubble.appendChild(divider);
+
+return;
+
+}
+
+
+/*
+Normal satır
+*/
+
+bubble.appendChild(
+document.createTextNode(line)
+);
+
+
+if(
+index < lines.length - 1
+){
+
+bubble.appendChild(
+document.createElement("br")
+);
+
+}
+
+});
+
+}
+
+
+/* =========================
+   MESAJ EKLE
+========================= */
 
 function addMessage(text,type){
 
 const chat =
 document.getElementById("chat");
 
+
 const message =
 document.createElement("div");
+
 
 message.className =
 "message " + type;
 
+
 const bubble =
 document.createElement("div");
 
+
 bubble.className="bubble";
+
+
+if(type==="ai"){
+
+renderAIText(
+bubble,
+text
+);
+
+}else{
 
 bubble.textContent =
 String(text).trim();
+
+}
+
 
 message.appendChild(bubble);
 
 chat.appendChild(message);
 
+
 const wrapper =
-document.querySelector(".chatWrapper");
+document.querySelector(
+".chatWrapper"
+);
+
 
 wrapper.scrollTop =
 wrapper.scrollHeight;
+
 
 return bubble;
 
 }
 
 
-/* YENİ CHAT */
+/* =========================
+   YENİ CHAT
+========================= */
 
 function newChat(){
 
 closeSidebar();
 
+
 document
 .getElementById("newChatModal")
 .classList.add("active");
+
 
 document
 .getElementById("newChatInput")
 .value="";
 
-setTimeout(()=>{
+
+setTimeout(
+()=>{
 
 document
 .getElementById("newChatInput")
 .focus();
 
-},100);
+},
+100
+);
 
 }
 
@@ -880,53 +1562,76 @@ document
 .value
 .trim();
 
+
 if(!title){
 
 alert("Sohbete bir isim koy.");
+
 return;
 
 }
 
+
 currentChat={
 
 id:Date.now(),
+
 title:title,
+
 messages:[]
 
 };
 
-chats.unshift(currentChat);
+
+chats.unshift(
+currentChat
+);
+
 
 saveChats();
+
 
 document
 .getElementById("chat")
 .innerHTML="";
 
-closeModal("newChatModal");
+
+closeModal(
+"newChatModal"
+);
+
 
 loadHistory();
 
 }
 
 
-/* MESAJ GÖNDER */
+/* =========================
+   MESAJ GÖNDER
+========================= */
 
 async function sendMessage(){
 
 const input =
-document.getElementById("messageInput");
+document.getElementById(
+"messageInput"
+);
+
 
 const sendBtn =
-document.getElementById("sendBtn");
+document.getElementById(
+"sendBtn"
+);
+
 
 const text =
 input.value.trim();
 
+
 if(!text)return;
 
 
-/* CHAT YOKSA OLUŞTUR */
+/* CHAT YOKSA */
 
 if(!currentChat){
 
@@ -941,7 +1646,11 @@ messages:[]
 
 };
 
-chats.unshift(currentChat);
+
+chats.unshift(
+currentChat
+);
+
 
 saveChats();
 
@@ -950,21 +1659,25 @@ loadHistory();
 }
 
 
-/* KULLANICI MESAJI */
+/* KULLANICI */
 
 addMessage(
 text,
 "user"
 );
 
+
 currentChat.messages.push({
 
 role:"user",
+
 text:text
 
 });
 
+
 saveChats();
+
 
 input.value="";
 
@@ -975,7 +1688,7 @@ sendBtn.disabled=true;
 
 const thinkingBubble =
 addMessage(
-"BeyinX düşünüyor...",
+"BeyinX düşünüyor... 🤔",
 "ai"
 );
 
@@ -986,6 +1699,7 @@ const response =
 await fetch(
 "/.netlify/functions/chat",
 {
+
 method:"POST",
 
 headers:{
@@ -1033,35 +1747,44 @@ throw new Error(
 }
 
 
-/* DÜŞÜNÜYOR YAZISINI CEVAPLA DEĞİŞTİR */
+/* CEVABI GÖSTER */
 
-thinkingBubble.textContent =
-answer;
+renderAIText(
+thinkingBubble,
+answer
+);
 
 
-/* AI MESAJINI KAYDET */
+/* KAYDET */
 
 currentChat.messages.push({
 
 role:"ai",
+
 text:answer
 
 });
 
+
 saveChats();
 
 
-}catch(error){
+}
+catch(error){
 
-thinkingBubble.textContent =
+renderAIText(
+thinkingBubble,
 "BeyinX bağlantı hatası:\n" +
-(error?.message ||
-"Beklenmeyen bir hata oluştu.");
+(
+error?.message ||
+"Beklenmeyen bir hata oluştu."
+)
+);
 
 }
 
 
-/* BUTONU TEKRAR AÇ */
+/* BUTON */
 
 sendBtn.disabled=false;
 
@@ -1070,7 +1793,9 @@ input.focus();
 }
 
 
-/* ENTER */
+/* =========================
+   ENTER
+========================= */
 
 function sendEnter(event){
 
@@ -1088,7 +1813,9 @@ sendMessage();
 }
 
 
-/* KAYDET */
+/* =========================
+   KAYDET
+========================= */
 
 function saveChats(){
 
@@ -1103,12 +1830,17 @@ JSON.stringify(chats)
 }
 
 
-/* GEÇMİŞ */
+/* =========================
+   GEÇMİŞ
+========================= */
 
 function loadHistory(){
 
 const history =
-document.getElementById("history");
+document.getElementById(
+"history"
+);
+
 
 history.innerHTML="";
 
@@ -1128,37 +1860,79 @@ return;
 }
 
 
-chats.forEach(chat=>{
+chats.forEach(
+chat=>{
+
 
 const item =
-document.createElement("div");
+document.createElement(
+"div"
+);
 
-item.className="historyItem";
 
-item.textContent =
+item.className =
+"historyItem";
+
+
+/* CHAT BAŞLIĞI */
+
+const title =
+document.createElement(
+"div"
+);
+
+
+title.className =
+"historyTitleText";
+
+
+title.textContent =
 "💬 " + chat.title;
 
 
-item.addEventListener(
-"click",
-()=>{
+/* ÜÇ NOKTA */
 
-openChat(chat.id);
+const dots =
+document.createElement(
+"button"
+);
+
+
+dots.className =
+"historyDots";
+
+
+dots.textContent="⋮";
+
+
+dots.title="Sohbet seçenekleri";
+
+
+dots.addEventListener(
+"click",
+event=>{
+
+event.stopPropagation();
+
+
+showActionMenu(
+chat.id,
+event.clientX - 215,
+event.clientY
+);
 
 }
 );
 
 
+/* CHAT TIK */
+
 item.addEventListener(
-"contextmenu",
-event=>{
+"click",
+()=>{
 
-event.preventDefault();
-
-showActionMenu(
-chat.id,
-event.clientX,
-event.clientY
+openChat(
+chat.id
 );
 
 }
@@ -1169,11 +1943,13 @@ event.clientY
 
 let timer;
 
+
 item.addEventListener(
 "touchstart",
 ()=>{
 
-timer=setTimeout(()=>{
+timer=setTimeout(
+()=>{
 
 showActionMenu(
 chat.id,
@@ -1181,11 +1957,16 @@ chat.id,
 120
 );
 
-},600);
+},
+600
+);
 
 },
-{passive:true}
+{
+passive:true
+}
 );
+
 
 item.addEventListener(
 "touchend",
@@ -1197,6 +1978,10 @@ clearTimeout(timer);
 );
 
 
+item.appendChild(title);
+
+item.appendChild(dots);
+
 history.appendChild(item);
 
 });
@@ -1204,7 +1989,9 @@ history.appendChild(item);
 }
 
 
-/* CHAT AÇ */
+/* =========================
+   CHAT AÇ
+========================= */
 
 function openChat(id){
 
@@ -1213,9 +2000,12 @@ chats.find(
 c=>c.id===id
 );
 
+
 if(!chat)return;
 
+
 currentChat=chat;
+
 
 document
 .getElementById("chat")
@@ -1233,12 +2023,15 @@ message.role
 }
 );
 
+
 closeSidebar();
 
 }
 
 
-/* UZUN BASMA */
+/* =========================
+   ACTION MENU
+========================= */
 
 function showActionMenu(
 id,
@@ -1248,22 +2041,32 @@ y
 
 selectedChatId=id;
 
+
 const menu =
 document.getElementById(
 "actionMenu"
 );
 
+
 menu.style.left =
+Math.max(
+8,
 Math.min(
 x,
-window.innerWidth-230
-)+"px";
+window.innerWidth - 230
+)
+) + "px";
+
 
 menu.style.top =
+Math.max(
+8,
 Math.min(
 y,
-window.innerHeight-110
-)+"px";
+window.innerHeight - 110
+)
+) + "px";
+
 
 menu.classList.add(
 "active"
@@ -1272,7 +2075,9 @@ menu.classList.add(
 }
 
 
-/* İSİM DEĞİŞTİR */
+/* =========================
+   CHAT İSMİ DEĞİŞTİR
+========================= */
 
 function renameChat(){
 
@@ -1281,17 +2086,21 @@ chats.find(
 c=>c.id===selectedChatId
 );
 
+
 if(!chat)return;
+
 
 document
 .getElementById("renameInput")
 .value=chat.title;
+
 
 document
 .getElementById("actionMenu")
 .classList.remove(
 "active"
 );
+
 
 document
 .getElementById("renameModal")
@@ -1310,34 +2119,47 @@ document
 .value
 .trim();
 
+
 if(!name){
 
 alert("Yeni ismi yaz.");
+
 return;
 
 }
+
 
 const chat =
 chats.find(
 c=>c.id===selectedChatId
 );
 
+
 if(!chat)return;
+
 
 chat.title=name;
 
+
 saveChats();
 
-closeModal("renameModal");
+
+closeModal(
+"renameModal"
+);
+
 
 selectedChatId=null;
+
 
 loadHistory();
 
 }
 
 
-/* CHAT SİL */
+/* =========================
+   CHAT SİL
+========================= */
 
 function deleteChat(){
 
@@ -1345,20 +2167,25 @@ if(
 selectedChatId===null
 )return;
 
+
 const index =
 chats.findIndex(
 c=>c.id===selectedChatId
 );
 
+
 if(index===-1)return;
+
 
 const deletedId =
 selectedChatId;
+
 
 chats.splice(
 index,
 1
 );
+
 
 saveChats();
 
@@ -1377,6 +2204,7 @@ showWelcome();
 
 selectedChatId=null;
 
+
 document
 .getElementById(
 "actionMenu"
@@ -1385,12 +2213,15 @@ document
 "active"
 );
 
+
 loadHistory();
 
 }
 
 
-/* MENÜ */
+/* =========================
+   SIDEBAR
+========================= */
 
 function openSidebar(){
 
@@ -1400,11 +2231,13 @@ document
 "active"
 );
 
+
 document
 .getElementById("overlay")
 .classList.add(
 "active"
 );
+
 
 loadHistory();
 
@@ -1419,11 +2252,13 @@ document
 "active"
 );
 
+
 document
 .getElementById("overlay")
 .classList.remove(
 "active"
 );
+
 
 document
 .getElementById("actionMenu")
@@ -1434,7 +2269,9 @@ document
 }
 
 
-/* MODAL */
+/* =========================
+   MODAL
+========================= */
 
 function closeModal(id){
 
@@ -1447,7 +2284,9 @@ document
 }
 
 
-/* ÇIKIŞ */
+/* =========================
+   ÇIKIŞ
+========================= */
 
 function logout(){
 
@@ -1455,17 +2294,21 @@ localStorage.removeItem(
 "beyinx_username"
 );
 
+
 username=null;
 
 currentChat=null;
+
 
 document
 .getElementById("app")
 .style.display="none";
 
+
 document
 .getElementById("nameScreen")
 .style.display="flex";
+
 
 document
 .getElementById("nameInput")
@@ -1474,22 +2317,45 @@ document
 }
 
 
-/* GÜVENLİ METİN */
+/* =========================
+   GÜVENLİ METİN
+========================= */
 
 function escapeHTML(text){
 
 return String(text)
 
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
+.replace(
+/&/g,
+"&amp;"
+)
+
+.replace(
+/</g,
+"&lt;"
+)
+
+.replace(
+/>/g,
+"&gt;"
+)
+
+.replace(
+/"/g,
+"&quot;"
+)
+
+.replace(
+/'/g,
+"&#039;"
+);
 
 }
 
 
-/* MENÜ DIŞI */
+/* =========================
+   MENÜ DIŞINA TIKLAMA
+========================= */
 
 document.addEventListener(
 "click",
@@ -1500,22 +2366,28 @@ document.getElementById(
 "actionMenu"
 );
 
+
 if(
 
-menu.classList.contains("active") &&
+menu.classList.contains(
+"active"
+) &&
 
-!menu.contains(event.target)
+!menu.contains(
+event.target
+)
 
 ){
 
-menu.classList.remove("active");
+menu.classList.remove(
+"active"
+);
 
 selectedChatId=null;
 
 }
 
-}
-);
+});
 
 </script>
 
