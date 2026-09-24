@@ -39,8 +39,7 @@ export default async (req) => {
     if (!apiKey) {
       return new Response(
         JSON.stringify({
-          error:
-            "GROQ_API_KEY Netlify Function tarafından bulunamadı."
+          error: "GROQ_API_KEY bulunamadı."
         }),
         {
           status: 500,
@@ -51,13 +50,46 @@ export default async (req) => {
       );
     }
 
-    const cleanMessages = messages.map((m) => ({
-      role:
-        m.role === "ai"
+    const cleanMessages = [
+      {
+        role: "system",
+        content: `
+Sen BeyinX adlı Türkçe yapay zeka asistanısın.
+
+Kullanıcıyla doğal, samimi ve anlaşılır Türkçe konuş.
+
+Gerektiğinde az miktarda emoji kullan.
+Örneğin: 🙂 😄 🤔 💡 👍 🔥 🚀
+
+Her cümlede emoji kullanma.
+
+Cevaplarını temiz ve okunabilir biçimde yaz.
+
+ASCII çizgileri veya dekoratif ayraçlar kullanma.
+Örneğin:
+-----------
+/-----------\\
+================
+
+gibi şeyler kullanma.
+
+Bunun yerine normal başlıklar, boşluklar veya kısa maddeler kullan.
+
+Gereksiz yere "BeyinX olarak..." diye kendini tanıtma.
+
+Kullanıcı kısa sorarsa kısa,
+detay isterse detaylı cevap ver.
+`
+      },
+
+      ...messages.map((m) => ({
+        role: m.role === "ai"
           ? "assistant"
           : "user",
-      content: String(m.text || "")
-    }));
+
+        content: String(m.text || "")
+      }))
+    ];
 
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -70,10 +102,9 @@ export default async (req) => {
         },
 
         body: JSON.stringify({
-          model: "openai/gpt-oss-20b",
+          model: "openai/gpt-oss-120b",
           messages: cleanMessages,
-          temperature: 0.7,
-          max_tokens: 2048
+          temperature: 0.7
         })
       }
     );
@@ -131,7 +162,7 @@ export default async (req) => {
       JSON.stringify({
         error:
           error?.message ||
-          "Beklenmeyen sunucu hatası."
+          "Beklenmeyen bir hata oluştu."
       }),
       {
         status: 500,
@@ -140,6 +171,5 @@ export default async (req) => {
         }
       }
     );
-
   }
 };
