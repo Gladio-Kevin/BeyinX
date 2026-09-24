@@ -2,10 +2,14 @@ export default async (req) => {
   try {
     if (req.method !== "POST") {
       return new Response(
-        JSON.stringify({ error: "Sadece POST kullanılabilir." }),
+        JSON.stringify({
+          error: "Sadece POST kullanılabilir."
+        }),
         {
           status: 405,
-          headers: { "Content-Type": "application/json" }
+          headers: {
+            "Content-Type": "application/json"
+          }
         }
       );
     }
@@ -18,10 +22,14 @@ export default async (req) => {
 
     if (messages.length === 0) {
       return new Response(
-        JSON.stringify({ error: "Mesaj bulunamadı." }),
+        JSON.stringify({
+          error: "Mesaj bulunamadı."
+        }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" }
+          headers: {
+            "Content-Type": "application/json"
+          }
         }
       );
     }
@@ -31,17 +39,23 @@ export default async (req) => {
     if (!apiKey) {
       return new Response(
         JSON.stringify({
-          error: "GROQ_API_KEY Netlify Function tarafından bulunamadı."
+          error:
+            "GROQ_API_KEY Netlify Function tarafından bulunamadı."
         }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" }
+          headers: {
+            "Content-Type": "application/json"
+          }
         }
       );
     }
 
     const cleanMessages = messages.map((m) => ({
-      role: m.role === "ai" ? "assistant" : "user",
+      role:
+        m.role === "ai"
+          ? "assistant"
+          : "user",
       content: String(m.text || "")
     }));
 
@@ -49,13 +63,17 @@ export default async (req) => {
       "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`
         },
+
         body: JSON.stringify({
-          model: "openai/gpt-oss-20b"
-          messages: cleanMessages
+          model: "openai/gpt-oss-20b",
+          messages: cleanMessages,
+          temperature: 0.7,
+          max_tokens: 2048
         })
       }
     );
@@ -108,6 +126,7 @@ export default async (req) => {
     );
 
   } catch (error) {
+
     return new Response(
       JSON.stringify({
         error:
@@ -121,5 +140,6 @@ export default async (req) => {
         }
       }
     );
+
   }
 };
