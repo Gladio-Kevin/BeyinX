@@ -39,7 +39,7 @@ export default async (req) => {
     if (!apiKey) {
       return new Response(
         JSON.stringify({
-          error: "BeyinX API anahtarı bulunamadı."
+          error: "GROQ_API_KEY bulunamadı."
         }),
         {
           status: 500,
@@ -79,6 +79,28 @@ Gereksiz yere "BeyinX olarak..." diye kendini tanıtma.
 
 Kullanıcı kısa sorarsa kısa,
 detay isterse detaylı cevap ver.
+
+BEYİNX HAKKINDA:
+
+BeyinX'in kurucusu Ömer'dir.
+Ömer'in kullandığı diğer isim Kevin'dir.
+
+Kullanıcı:
+"Seni kim yaptı?"
+"Kurucun kim?"
+"BeyinX'i kim yaptı?"
+"BeyinX'in kurucusu kim?"
+"Senin sahibin kim?"
+
+gibi sorular sorarsa doğal şekilde cevap ver.
+
+Örneğin:
+"Benim kurucum Ömer, diğer adıyla Kevin. BeyinX'i o geliştirdi. 🧠"
+
+Ancak bu cümleyi her seferinde birebir kullanmak zorunda değilsin.
+Sorunun şekline göre doğal cevap ver.
+
+Bu bilgiyi kullanıcı sormadığı sürece gereksiz yere konuşmaya sokma.
 `
       },
 
@@ -86,124 +108,40 @@ detay isterse detaylı cevap ver.
         role: m.role === "ai"
           ? "assistant"
           : "user",
+
         content: String(m.text || "")
       }))
     ];
 
-    const maxRetries = 3;
-    let response = null;
-    let data = null;
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
 
-    /*
-      Geçici API hatalarında tekrar dene.
-      429 = rate limit
-      500/502/503/504 = geçici sunucu hataları
-    */
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
 
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-
-      response = await fetch(
-        "https://api.groq.com/openai/v1/chat/completions",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`
-          },
-
-          body: JSON.stringify({
-            model: "openai/gpt-oss-120b",
-            messages: cleanMessages,
-            temperature: 0.7
-          })
-        }
-      );
-
-      data = await response.json();
-
-      if (response.ok) {
-        break;
+        body: JSON.stringify({
+          model: "openai/gpt-oss-120b",
+          messages: cleanMessages,
+          temperature: 0.7
+        })
       }
+    );
 
-      const retryable =
-        response.status === 429 ||
-        response.status === 500 ||
-        response.status === 502 ||
-        response.status === 503 ||
-        response.status === 504;
+    const data = await response.json();
 
-      if (!retryable || attempt === maxRetries) {
-        break;
-      }
-
-      /*
-        Groq 429 durumunda retry-after gönderebilir.
-        Varsa onu kullanıyoruz.
-      */
-
-      const retryAfter =
-        Number(response.headers.get("retry-after"));
-
-      const waitSeconds =
-        Number.isFinite(retryAfter) && retryAfter > 0
-          ? Math.min(retryAfter, 10)
-          : Math.min(
-              Math.pow(2, attempt),
-              8
-            );
-
-      await new Promise(resolve =>
-        setTimeout(
-          resolve,
-          waitSeconds * 1000
-        )
-      );
-    }
-
-    /* API hâlâ hata veriyorsa */
-
-    if (!response || !response.ok) {
-
-      let errorMessage =
-        "BeyinX şu anda cevap veremiyor.";
-
-      if (response?.status === 429) {
-        errorMessage =
-          "BeyinX şu anda çok fazla istek alıyor. Birkaç saniye sonra tekrar dene.";
-      }
-
-      else if (response?.status === 401) {
-        errorMessage =
-          "BeyinX API anahtarı geçersiz.";
-      }
-
-      else if (response?.status === 403) {
-        errorMessage =
-          "BeyinX API erişimi reddedildi.";
-      }
-
-      else if (
-        response?.status === 500 ||
-        response?.status === 502 ||
-        response?.status === 503 ||
-        response?.status === 504
-      ) {
-        errorMessage =
-          "BeyinX sunucusu şu anda yoğun. Birkaç saniye sonra tekrar dene.";
-      }
-
-      else if (data?.error?.message) {
-        errorMessage =
-          data.error.message;
-      }
-
+    if (!response.ok) {
       return new Response(
         JSON.stringify({
-          error: errorMessage
+          error:
+            data?.error?.message ||
+            "Groq API hata verdi."
         }),
         {
-          status: response?.status || 500,
+          status: response.status,
           headers: {
             "Content-Type": "application/json"
           }
@@ -245,7 +183,8 @@ detay isterse detaylı cevap ver.
     return new Response(
       JSON.stringify({
         error:
-          "BeyinX sunucusuna bağlanırken bir sorun oluştu."
+          error?.message ||
+          "Beklenmeyen bir hata oluştu."
       }),
       {
         status: 500,
