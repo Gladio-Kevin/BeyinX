@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#6366f1">
+<meta name="mobile-web-app-capable" content="yes">
+
 <title>BeyinX</title>
+
+<link rel="manifest" href="/manifest.webmanifest">
 
 <style>
 *{
@@ -12,45 +17,15 @@ margin:0;
 padding:0
 }
 
-:root{
---bg:#f6f7fb;
---text:#171827;
---card:rgba(255,255,255,.88);
---header:rgba(255,255,255,.78);
---border:#dedfea;
---soft:#eef0f6;
---muted:#777d8d;
---purple:#6366f1;
---purple2:#805cf5;
-}
-
-body.dark{
---bg:#11131d;
---text:#f2f3fa;
---card:rgba(28,30,43,.92);
---header:rgba(20,22,33,.88);
---border:#343747;
---soft:#292c3b;
---muted:#a8adbd;
-}
-
 body{
 font-family:Arial,sans-serif;
 height:100vh;
 overflow:hidden;
-color:var(--text);
+color:#171827;
 background:
 radial-gradient(circle at 20% 10%,#e8eaff 0,transparent 35%),
 radial-gradient(circle at 90% 80%,#dff7ff 0,transparent 35%),
-var(--bg);
-transition:background .25s,color .25s;
-}
-
-body.dark{
-background:
-radial-gradient(circle at 20% 10%,#252650 0,transparent 35%),
-radial-gradient(circle at 90% 80%,#173641 0,transparent 35%),
-var(--bg);
+#f6f7fb;
 }
 
 button{
@@ -84,7 +59,7 @@ box-shadow:0 20px 60px rgba(70,75,130,.15);
 }
 
 .nameBrain{
-font-size:55px
+font-size:55px;
 }
 
 .nameLogo{
@@ -144,9 +119,9 @@ flex-shrink:0;
 display:flex;
 align-items:center;
 padding:0 13px;
-background:var(--header);
+background:rgba(255,255,255,.78);
 backdrop-filter:blur(18px);
-border-bottom:1px solid var(--border);
+border-bottom:1px solid #ddd;
 }
 
 .menuBtn{
@@ -156,7 +131,6 @@ border:0;
 border-radius:13px;
 background:transparent;
 font-size:25px;
-color:var(--text);
 }
 
 .logo{
@@ -166,23 +140,6 @@ font-weight:900;
 display:flex;
 align-items:center;
 gap:7px;
-}
-
-.logo span,
-.sideLogo span,
-.welcomeTitle span{
-color:#696cf4;
-}
-
-.beta{
-font-size:10px;
-font-weight:900;
-letter-spacing:.7px;
-padding:4px 7px;
-border-radius:7px;
-color:#6366f1;
-background:#ececff;
-border:1px solid #d9d9ff;
 }
 
 .chatWrapper{
@@ -205,7 +162,7 @@ width:min(600px,94%);
 padding:35px 25px;
 text-align:center;
 border-radius:28px;
-background:var(--card);
+background:rgba(255,255,255,.76);
 backdrop-filter:blur(15px);
 box-shadow:0 15px 50px rgba(80,85,140,.08);
 }
@@ -228,8 +185,12 @@ font-weight:900;
 margin-bottom:9px;
 }
 
+.welcomeTitle span{
+color:#696cf4;
+}
+
 .welcomeText{
-color:var(--muted);
+color:#777d8d;
 line-height:1.6;
 font-size:14px;
 }
@@ -264,8 +225,8 @@ word-break:break-word;
 }
 
 .ai .bubble{
-background:var(--card);
-border:1px solid var(--border);
+background:rgba(255,255,255,.9);
+border:1px solid #e3e5ec;
 }
 
 .user .bubble{
@@ -290,7 +251,7 @@ margin-top:7px;
 
 .messageOptions:hover,
 .messageOptions:active{
-background:var(--soft);
+background:#e9eaf1;
 opacity:1;
 }
 
@@ -307,13 +268,6 @@ rgba(246,247,251,.96) 28%
 z-index:10;
 }
 
-body.dark .inputContainer{
-background:linear-gradient(
-transparent,
-rgba(17,19,29,.96) 28%
-);
-}
-
 .inputBox{
 max-width:820px;
 min-height:82px;
@@ -321,9 +275,9 @@ margin:auto;
 display:flex;
 align-items:flex-end;
 padding:8px;
-background:var(--card);
+background:rgba(255,255,255,.94);
 backdrop-filter:blur(18px);
-border:1px solid var(--border);
+border:1px solid #dedfea;
 border-radius:22px;
 box-shadow:0 10px 35px rgba(60,65,110,.1);
 }
@@ -338,11 +292,6 @@ outline:0;
 padding:13px 10px;
 font:16px Arial;
 background:transparent;
-color:var(--text);
-}
-
-textarea::placeholder{
-color:var(--muted);
 }
 
 .sendBtn{
@@ -378,7 +327,7 @@ top:0;
 left:-310px;
 width:290px;
 height:100vh;
-background:var(--card);
+background:rgba(255,255,255,.97);
 z-index:30;
 transition:.25s;
 box-shadow:8px 0 30px #0002;
@@ -396,7 +345,7 @@ display:flex;
 align-items:center;
 justify-content:space-between;
 padding:0 15px;
-border-bottom:1px solid var(--border);
+border-bottom:1px solid #e7e8ee;
 }
 
 .sideLogo{
@@ -412,9 +361,8 @@ width:38px;
 height:38px;
 border:0;
 border-radius:11px;
-background:var(--soft);
+background:#f0f1f6;
 font-size:22px;
-color:var(--text);
 }
 
 .newChatBtn{
@@ -447,7 +395,7 @@ text-overflow:ellipsis;
 }
 
 .historyItem:hover{
-background:var(--soft);
+background:#f0f1f6;
 }
 
 .emptyHistory{
@@ -459,21 +407,9 @@ color:#999;
 margin:5px 15px 12px;
 height:45px;
 flex-shrink:0;
-border:1px solid var(--border);
-background:var(--card);
-color:var(--text);
+border:1px solid #e0e2e8;
+background:white;
 border-radius:12px;
-}
-
-.settingsBtn{
-margin:0 15px 8px;
-height:45px;
-flex-shrink:0;
-border:1px solid var(--border);
-background:var(--card);
-color:var(--text);
-border-radius:12px;
-font-weight:bold;
 }
 
 .modal{
@@ -494,10 +430,9 @@ display:flex;
 .modalBox{
 width:100%;
 max-width:380px;
-background:var(--card);
+background:white;
 border-radius:23px;
 padding:25px;
-color:var(--text);
 }
 
 .modalTitle{
@@ -507,7 +442,7 @@ margin-bottom:8px;
 }
 
 .modalDesc{
-color:var(--muted);
+color:#777d89;
 font-size:14px;
 margin-bottom:18px;
 }
@@ -528,8 +463,7 @@ font-weight:bold;
 }
 
 .cancelBtn{
-background:var(--soft);
-color:var(--text);
+background:#eef0f4;
 }
 
 .confirmBtn{
@@ -540,8 +474,8 @@ color:white;
 .actionMenu{
 position:fixed;
 width:220px;
-background:var(--card);
-border:1px solid var(--border);
+background:white;
+border:1px solid #e0e2e7;
 border-radius:15px;
 padding:6px;
 box-shadow:0 12px 35px #0003;
@@ -557,8 +491,7 @@ display:block;
 width:100%;
 height:45px;
 border:0;
-background:transparent;
-color:var(--text);
+background:white;
 border-radius:10px;
 text-align:left;
 padding:0 13px;
@@ -566,7 +499,7 @@ font-size:14px;
 }
 
 .actionBtn:hover{
-background:var(--soft);
+background:#f1f2f6;
 }
 
 .deleteBtn{
@@ -594,80 +527,6 @@ opacity:1;
 transform:translateX(-50%) translateY(0);
 }
 
-/* AYARLAR */
-
-.settingsBox{
-max-width:430px;
-max-height:85vh;
-overflow-y:auto;
-}
-
-.settingGroup{
-margin-top:18px;
-}
-
-.settingLabel{
-font-size:13px;
-font-weight:bold;
-color:var(--muted);
-margin-bottom:8px;
-}
-
-.settingRow{
-display:flex;
-gap:8px;
-}
-
-.settingChoice{
-flex:1;
-height:45px;
-border:1px solid var(--border);
-border-radius:12px;
-background:var(--card);
-color:var(--text);
-font-weight:bold;
-}
-
-.settingChoice.active{
-background:#6366f1;
-color:white;
-border-color:#6366f1;
-}
-
-.dangerButton{
-width:100%;
-height:47px;
-border:0;
-border-radius:12px;
-background:#ffe9e9;
-color:#e53935;
-font-weight:bold;
-}
-
-.aboutCard{
-padding:15px;
-border-radius:15px;
-background:var(--soft);
-line-height:1.6;
-font-size:14px;
-color:var(--muted);
-}
-
-.aboutCard strong{
-color:var(--text);
-}
-
-.settingsClose{
-width:100%;
-height:47px;
-margin-top:15px;
-border:0;
-border-radius:12px;
-background:#6366f1;
-color:white;
-font-weight:bold;
-}
-
 @media(max-width:500px){
 
 .messageContent{
@@ -682,15 +541,9 @@ font-size:15.5px;
 font-size:21px;
 }
 
-.beta{
-font-size:9px;
-padding:3px 6px;
-}
-
 .sidebar{
 width:285px;
 }
-
 }
 </style>
 </head>
@@ -703,13 +556,9 @@ width:285px;
 
 <div class="nameBrain">🧠</div>
 
-<div class="nameLogo">
-BeyinX
-</div>
+<div class="nameLogo">BeyinX</div>
 
-<div class="nameTitle">
-İsim koy
-</div>
+<div class="nameTitle">İsim koy</div>
 
 <div class="nameDesc">
 BeyinX seni bu isimle tanıyacak.
@@ -729,7 +578,6 @@ Devam et
 </button>
 
 </div>
-
 </div>
 
 
@@ -743,10 +591,7 @@ onclick="openSidebar()">
 ☰
 </button>
 
-<div class="logo">
-🧠 BeyinX
-<span class="beta">BETA</span>
-</div>
+<div class="logo">🧠 BeyinX</div>
 
 </header>
 
@@ -776,7 +621,6 @@ onclick="sendMessage()">
 </button>
 
 </div>
-
 </div>
 
 </div>
@@ -795,10 +639,7 @@ class="sidebar">
 
 <div class="sideHeader">
 
-<div class="sideLogo">
-🧠 BeyinX
-<span class="beta">BETA</span>
-</div>
+<div class="sideLogo">🧠 BeyinX</div>
 
 <button
 class="closeBtn"
@@ -808,31 +649,17 @@ onclick="closeSidebar()">
 
 </div>
 
-
 <button
 class="newChatBtn"
 onclick="newChat()">
 ＋ Yeni sohbet
 </button>
 
-
 <div class="historyTitle">
 SOHBETLER
 </div>
 
-
-<div
-id="history"
-class="history">
-</div>
-
-
-<button
-class="settingsBtn"
-onclick="openSettings()">
-⚙️ Ayarlar
-</button>
-
+<div id="history" class="history"></div>
 
 <button
 class="logout"
@@ -843,17 +670,11 @@ onclick="logout()">
 </aside>
 
 
-<!-- YENİ CHAT -->
-
-<div
-id="newChatModal"
-class="modal">
+<div id="newChatModal" class="modal">
 
 <div class="modalBox">
 
-<div class="modalTitle">
-Yeni sohbet
-</div>
+<div class="modalTitle">Yeni sohbet</div>
 
 <div class="modalDesc">
 Bu sohbete bir isim koy.
@@ -881,17 +702,11 @@ Oluştur
 </button>
 
 </div>
-
+</div>
 </div>
 
-</div>
 
-
-<!-- YENİDEN ADLANDIR -->
-
-<div
-id="renameModal"
-class="modal">
+<div id="renameModal" class="modal">
 
 <div class="modalBox">
 
@@ -925,148 +740,11 @@ Kaydet
 </button>
 
 </div>
-
 </div>
-
-</div>
-
-
-<!-- AYARLAR -->
-
-<div
-id="settingsModal"
-class="modal">
-
-<div class="modalBox settingsBox">
-
-<div class="modalTitle">
-⚙️ BeyinX Ayarları
-</div>
-
-<div class="modalDesc">
-Uygulamanın görünümünü ve bazı tercihlerini düzenle.
 </div>
 
 
-<div class="settingGroup">
-
-<div class="settingLabel">
-TEMA
-</div>
-
-<div class="settingRow">
-
-<button
-id="themeSystem"
-class="settingChoice"
-onclick="setTheme('system')">
-Sistem
-</button>
-
-<button
-id="themeLight"
-class="settingChoice"
-onclick="setTheme('light')">
-☀️ Açık
-</button>
-
-<button
-id="themeDark"
-class="settingChoice"
-onclick="setTheme('dark')">
-🌙 Koyu
-</button>
-
-</div>
-
-</div>
-
-
-<div class="settingGroup">
-
-<div class="settingLabel">
-YAZI BOYUTU
-</div>
-
-<div class="settingRow">
-
-<button
-class="settingChoice"
-onclick="setFontSize('small')">
-Küçük
-</button>
-
-<button
-class="settingChoice"
-onclick="setFontSize('normal')">
-Normal
-</button>
-
-<button
-class="settingChoice"
-onclick="setFontSize('large')">
-Büyük
-</button>
-
-</div>
-
-</div>
-
-
-<div class="settingGroup">
-
-<div class="settingLabel">
-BEYİNX HAKKINDA
-</div>
-
-<div class="aboutCard">
-
-<strong>🧠 BeyinX</strong><br>
-
-Türkçe yapay zeka sohbet uygulaması.<br><br>
-
-<strong>Sürüm:</strong> 1.0.0 BETA<br>
-
-<strong>Kurucu:</strong> Ömer, diğer adıyla Kevin<br><br>
-
-BeyinX geliştirme aşamasındadır. 🚀
-
-</div>
-
-</div>
-
-
-<div class="settingGroup">
-
-<div class="settingLabel">
-VERİLER
-</div>
-
-<button
-class="dangerButton"
-onclick="clearAllChats()">
-🗑️ Tüm sohbetleri sil
-</button>
-
-</div>
-
-
-<button
-class="settingsClose"
-onclick="closeModal('settingsModal')">
-Tamam
-</button>
-
-</div>
-
-</div>
-
-
-<!-- CHAT MENÜSÜ -->
-
-<div
-id="actionMenu"
-class="actionMenu">
+<div id="actionMenu" class="actionMenu">
 
 <button
 class="actionBtn"
@@ -1083,11 +761,7 @@ onclick="deleteChat()">
 </div>
 
 
-<!-- MESAJ MENÜSÜ -->
-
-<div
-id="messageMenu"
-class="actionMenu">
+<div id="messageMenu" class="actionMenu">
 
 <button
 class="actionBtn"
@@ -1112,182 +786,30 @@ onclick="deleteSelectedMessage()">
 </div>
 
 
-<div
-id="toast"
-class="toast">
+<div id="toast" class="toast">
 Kopyalandı ✓
 </div>
 
 
 <script>
 
-let username =
-localStorage.getItem("beyinx_username");
+let username=localStorage.getItem("beyinx_username");
 
-let chats =
-JSON.parse(
-localStorage.getItem("beyinx_chats") || "[]"
+let chats=JSON.parse(
+localStorage.getItem("beyinx_chats")||"[]"
 );
 
-let currentChat = null;
-let selectedChatId = null;
-let selectedMessageIndex = null;
-
-
-/* AYARLAR */
-
-let savedTheme =
-localStorage.getItem("beyinx_theme") || "system";
-
-let savedFont =
-localStorage.getItem("beyinx_font") || "normal";
-
-
-function applyTheme(){
-
-if(savedTheme==="dark"){
-
-document.body.classList.add("dark");
-
-}else if(savedTheme==="light"){
-
-document.body.classList.remove("dark");
-
-}else{
-
-if(
-window.matchMedia &&
-window.matchMedia(
-"(prefers-color-scheme: dark)"
-).matches
-){
-
-document.body.classList.add("dark");
-
-}else{
-
-document.body.classList.remove("dark");
-
-}
-
-}
-
-}
-
-
-function setTheme(theme){
-
-savedTheme=theme;
-
-localStorage.setItem(
-"beyinx_theme",
-theme
-);
-
-applyTheme();
-updateSettingsButtons();
-
-}
-
-
-function setFontSize(size){
-
-savedFont=size;
-
-localStorage.setItem(
-"beyinx_font",
-size
-);
-
-let value="16px";
-
-if(size==="small"){
-value="14px";
-}
-
-if(size==="large"){
-value="18px";
-}
-
-document
-.querySelectorAll(".bubble")
-.forEach(el=>{
-el.style.fontSize=value;
-});
-
-updateSettingsButtons();
-
-}
-
-
-function updateSettingsButtons(){
-
-document
-.querySelectorAll(".settingChoice")
-.forEach(btn=>{
-btn.classList.remove("active");
-});
-
-const themeButton =
-document.getElementById(
-"theme" +
-savedTheme.charAt(0).toUpperCase() +
-savedTheme.slice(1)
-);
-
-if(themeButton){
-themeButton.classList.add("active");
-}
-
-}
-
-
-function openSettings(){
-
-closeSidebar();
-
-document
-.getElementById("settingsModal")
-.classList.add("active");
-
-updateSettingsButtons();
-
-}
-
-
-/* SİSTEM TEMASI DEĞİŞİRSE */
-
-if(window.matchMedia){
-
-window
-.matchMedia("(prefers-color-scheme: dark)")
-.addEventListener(
-"change",
-()=>{
-
-if(savedTheme==="system"){
-applyTheme();
-}
-
-}
-);
-
-}
-
-applyTheme();
+let currentChat=null;
+let selectedChatId=null;
+let selectedMessageIndex=null;
 
 
 /* AÇILIŞ */
 
 if(username){
 
-document
-.getElementById("nameScreen")
-.style.display="none";
-
-document
-.getElementById("app")
-.style.display="flex";
+document.getElementById("nameScreen").style.display="none";
+document.getElementById("app").style.display="flex";
 
 showWelcome();
 loadHistory();
@@ -1299,11 +821,9 @@ loadHistory();
 
 function saveName(){
 
-const name =
-document
+const name=document
 .getElementById("nameInput")
-.value
-.trim();
+.value.trim();
 
 if(!name){
 
@@ -1319,26 +839,19 @@ localStorage.setItem(
 username
 );
 
-document
-.getElementById("nameScreen")
-.style.display="none";
-
-document
-.getElementById("app")
-.style.display="flex";
+document.getElementById("nameScreen").style.display="none";
+document.getElementById("app").style.display="flex";
 
 showWelcome();
 loadHistory();
 
 }
 
-
 function nameEnter(event){
 
 if(event.key==="Enter"){
 
 event.preventDefault();
-
 saveName();
 
 }
@@ -1350,21 +863,17 @@ saveName();
 
 function showWelcome(){
 
-const chat =
-document.getElementById("chat");
+const chat=document.getElementById("chat");
 
 chat.innerHTML="";
 
-const card =
-document.createElement("div");
+const card=document.createElement("div");
 
 card.className="welcomeCard";
 
 card.innerHTML=`
 
-<div class="welcomeIcon">
-🧠
-</div>
+<div class="welcomeIcon">🧠</div>
 
 <div class="welcomeTitle">
 Merhaba
@@ -1373,8 +882,7 @@ Merhaba
 
 <div class="welcomeText">
 BeyinX burada.<br>
-Ne yapmak istiyorsan yaz,
-başlayalım. 🚀
+Ne yapmak istiyorsan yaz, başlayalım. 🚀
 </div>
 
 `;
@@ -1388,8 +896,7 @@ chat.appendChild(card);
 
 function showToast(text){
 
-const toast =
-document.getElementById("toast");
+const toast=document.getElementById("toast");
 
 toast.textContent=text;
 
@@ -1397,8 +904,7 @@ toast.classList.add("show");
 
 clearTimeout(window.toastTimer);
 
-window.toastTimer =
-setTimeout(()=>{
+window.toastTimer=setTimeout(()=>{
 
 toast.classList.remove("show");
 
@@ -1407,48 +913,29 @@ toast.classList.remove("show");
 }
 
 
-/* MESAJ EKLE */
+/* MESAJ */
 
-function addMessage(
-text,
-type,
-messageIndex=null
-){
+function addMessage(text,type,messageIndex=null){
 
-const chat =
-document.getElementById("chat");
+const chat=document.getElementById("chat");
 
-const message =
-document.createElement("div");
+const message=document.createElement("div");
 
-message.className =
-"message " + type;
+message.className="message "+type;
 
-const content =
-document.createElement("div");
+const content=document.createElement("div");
 
 content.className="messageContent";
 
-const bubble =
-document.createElement("div");
+const bubble=document.createElement("div");
 
 bubble.className="bubble";
 
-bubble.textContent =
-String(text).trim();
-
-if(savedFont==="small"){
-bubble.style.fontSize="14px";
-}
-
-if(savedFont==="large"){
-bubble.style.fontSize="18px";
-}
+bubble.textContent=String(text).trim();
 
 content.appendChild(bubble);
 
-const options =
-document.createElement("button");
+const options=document.createElement("button");
 
 options.className="messageOptions";
 
@@ -1473,13 +960,11 @@ message.appendChild(options);
 
 chat.appendChild(message);
 
-const wrapper =
-document.querySelector(".chatWrapper");
+const wrapper=document.querySelector(".chatWrapper");
 
 setTimeout(()=>{
 
-wrapper.scrollTop =
-wrapper.scrollHeight;
+wrapper.scrollTop=wrapper.scrollHeight;
 
 },20);
 
@@ -1490,54 +975,30 @@ return bubble;
 
 /* MESAJ MENÜSÜ */
 
-function showMessageMenu(
-index,
-type,
-button
-){
+function showMessageMenu(index,type,button){
 
 selectedMessageIndex=index;
 
-const menu =
-document.getElementById("messageMenu");
+const menu=document.getElementById("messageMenu");
 
-const rect =
-button.getBoundingClientRect();
+const rect=button.getBoundingClientRect();
 
-let left =
-rect.left - 185;
+let left=rect.left-185;
+let top=rect.bottom+6;
 
-let top =
-rect.bottom + 6;
+if(left<8)left=8;
 
-if(left < 8){
-left=8;
-}
+if(left+220>window.innerWidth-8)
+left=window.innerWidth-228;
 
-if(left + 220 >
-window.innerWidth - 8){
-
-left =
-window.innerWidth - 228;
-
-}
-
-if(top + 155 >
-window.innerHeight - 8){
-
-top =
-rect.top - 160;
-
-}
+if(top+155>window.innerHeight-8)
+top=rect.top-160;
 
 menu.style.left=left+"px";
 menu.style.top=top+"px";
 
-const regenerate =
-document.getElementById("regenerateBtn");
-
-const deleteBtn =
-document.getElementById("messageDeleteBtn");
+const regenerate=document.getElementById("regenerateBtn");
+const deleteBtn=document.getElementById("messageDeleteBtn");
 
 if(type==="ai"){
 
@@ -1560,33 +1021,25 @@ menu.classList.add("active");
 
 async function copySelectedMessage(){
 
-if(
-!currentChat ||
-selectedMessageIndex===null
-)return;
+if(!currentChat||selectedMessageIndex===null)return;
 
-const message =
-currentChat.messages[
-selectedMessageIndex
-];
+const message=currentChat.messages[selectedMessageIndex];
 
 if(!message)return;
 
 try{
 
 await navigator.clipboard.writeText(
-String(message.text || "")
+String(message.text||"")
 );
 
 showToast("Kopyalandı ✓");
 
 }catch{
 
-const temp =
-document.createElement("textarea");
+const temp=document.createElement("textarea");
 
-temp.value =
-String(message.text || "");
+temp.value=String(message.text||"");
 
 document.body.appendChild(temp);
 
@@ -1605,27 +1058,17 @@ closeMessageMenu();
 }
 
 
-/* KULLANICI MESAJINI SİL */
+/* MESAJ SİL */
 
 function deleteSelectedMessage(){
 
-if(
-!currentChat ||
-selectedMessageIndex===null
-)return;
+if(!currentChat||selectedMessageIndex===null)return;
 
-const index =
-selectedMessageIndex;
+const index=selectedMessageIndex;
 
-if(
-index < 0 ||
-index >= currentChat.messages.length
-)return;
+if(index<0||index>=currentChat.messages.length)return;
 
-currentChat.messages.splice(
-index,
-1
-);
+currentChat.messages.splice(index,1);
 
 saveChats();
 
@@ -1640,50 +1083,15 @@ renderCurrentChat();
 
 async function regenerateSelectedMessage(){
 
-if(
-!currentChat ||
-selectedMessageIndex===null
-)return;
+if(!currentChat||selectedMessageIndex===null)return;
 
-const aiIndex =
-selectedMessageIndex;
+const aiIndex=selectedMessageIndex;
 
-const aiMessage =
-currentChat.messages[aiIndex];
+const aiMessage=currentChat.messages[aiIndex];
 
-if(
-!aiMessage ||
-aiMessage.role!=="ai"
-)return;
+if(!aiMessage||aiMessage.role!=="ai")return;
 
-let userIndex =
-aiIndex - 1;
-
-while(
-userIndex >= 0 &&
-currentChat.messages[userIndex].role!=="user"
-){
-
-userIndex--;
-
-}
-
-if(userIndex < 0){
-
-showToast(
-"Yeniden oluşturulacak mesaj bulunamadı."
-);
-
-closeMessageMenu();
-
-return;
-
-}
-
-currentChat.messages.splice(
-aiIndex,
-1
-);
+currentChat.messages.splice(aiIndex,1);
 
 saveChats();
 
@@ -1691,8 +1099,7 @@ closeMessageMenu();
 
 renderCurrentChat();
 
-const thinkingBubble =
-addMessage(
+const thinkingBubble=addMessage(
 "BeyinX yeniden düşünüyor... 🤔",
 "ai",
 currentChat.messages.length
@@ -1700,42 +1107,31 @@ currentChat.messages.length
 
 try{
 
-const response =
-await fetch(
+const response=await fetch(
 "/.netlify/functions/chat",
 {
 method:"POST",
-
 headers:{
-"Content-Type":
-"application/json"
+"Content-Type":"application/json"
 },
-
 body:JSON.stringify({
-
-messages:
-currentChat.messages
-
+messages:currentChat.messages
 })
-
 }
 );
 
-const data =
-await response.json();
+const data=await response.json();
 
 if(!response.ok){
 
 throw new Error(
-data?.error ||
-"Sunucu hatası."
+data?.error||"Sunucu hatası."
 );
 
 }
 
-const answer =
-String(
-data?.output_text || ""
+const answer=String(
+data?.output_text||""
 ).trim();
 
 if(!answer){
@@ -1746,14 +1142,11 @@ throw new Error(
 
 }
 
-thinkingBubble.textContent =
-answer;
+thinkingBubble.textContent=answer;
 
 currentChat.messages.push({
-
 role:"ai",
 text:answer
-
 });
 
 saveChats();
@@ -1762,12 +1155,10 @@ renderCurrentChat();
 
 }catch(error){
 
-thinkingBubble.textContent =
-"BeyinX bağlantı hatası:\n" +
-(
-error?.message ||
-"Beklenmeyen bir hata oluştu."
-);
+thinkingBubble.textContent=
+"BeyinX bağlantı hatası:\n"+
+(error?.message||
+"Beklenmeyen bir hata oluştu.");
 
 }
 
@@ -1794,23 +1185,20 @@ function renderCurrentChat(){
 if(!currentChat){
 
 showWelcome();
-
 return;
 
 }
 
-const chat =
-document.getElementById("chat");
+const chat=document.getElementById("chat");
 
 chat.innerHTML="";
 
 if(
-!currentChat.messages ||
+!currentChat.messages||
 currentChat.messages.length===0
 ){
 
 showWelcome();
-
 return;
 
 }
@@ -1857,11 +1245,9 @@ document
 
 function createChat(){
 
-const title =
-document
+const title=document
 .getElementById("newChatInput")
-.value
-.trim();
+.value.trim();
 
 if(!title){
 
@@ -1871,72 +1257,55 @@ return;
 }
 
 currentChat={
-
 id:Date.now(),
 title:title,
 messages:[]
-
 };
 
 chats.unshift(currentChat);
 
 saveChats();
 
-document
-.getElementById("chat")
-.innerHTML="";
-
 closeModal("newChatModal");
+
+renderCurrentChat();
 
 loadHistory();
 
 }
 
 
-/* MESAJ */
+/* MESAJ GÖNDER */
 
 async function sendMessage(){
 
-const input =
-document.getElementById("messageInput");
+const input=document.getElementById("messageInput");
+const sendBtn=document.getElementById("sendBtn");
 
-const sendBtn =
-document.getElementById("sendBtn");
-
-const text =
-input.value.trim();
+const text=input.value.trim();
 
 if(!text)return;
 
 if(!currentChat){
 
 currentChat={
-
 id:Date.now(),
-
-title:
-text.substring(0,60),
-
+title:text.substring(0,60),
 messages:[]
-
 };
 
 chats.unshift(currentChat);
 
 saveChats();
-
 loadHistory();
 
 }
 
-const userIndex =
-currentChat.messages.length;
+const userIndex=currentChat.messages.length;
 
 currentChat.messages.push({
-
 role:"user",
 text:text
-
 });
 
 addMessage(
@@ -1948,14 +1317,11 @@ userIndex
 saveChats();
 
 input.value="";
-
 sendBtn.disabled=true;
 
-const thinkingIndex =
-currentChat.messages.length;
+const thinkingIndex=currentChat.messages.length;
 
-const thinkingBubble =
-addMessage(
+const thinkingBubble=addMessage(
 "BeyinX düşünüyor... 🤔",
 "ai",
 thinkingIndex
@@ -1963,42 +1329,33 @@ thinkingIndex
 
 try{
 
-const response =
-await fetch(
+const response=await fetch(
 "/.netlify/functions/chat",
 {
 method:"POST",
 
 headers:{
-"Content-Type":
-"application/json"
+"Content-Type":"application/json"
 },
 
 body:JSON.stringify({
-
-messages:
-currentChat.messages
-
+messages:currentChat.messages
 })
-
 }
 );
 
-const data =
-await response.json();
+const data=await response.json();
 
 if(!response.ok){
 
 throw new Error(
-data?.error ||
-"Sunucu hatası."
+data?.error||"Sunucu hatası."
 );
 
 }
 
-const answer =
-String(
-data?.output_text || ""
+const answer=String(
+data?.output_text||""
 ).trim();
 
 if(!answer){
@@ -2009,14 +1366,11 @@ throw new Error(
 
 }
 
-thinkingBubble.textContent =
-answer;
+thinkingBubble.textContent=answer;
 
 currentChat.messages.push({
-
 role:"ai",
 text:answer
-
 });
 
 saveChats();
@@ -2025,17 +1379,14 @@ renderCurrentChat();
 
 }catch(error){
 
-thinkingBubble.textContent =
-"BeyinX bağlantı hatası:\n" +
-(
-error?.message ||
-"Beklenmeyen bir hata oluştu."
-);
+thinkingBubble.textContent=
+"BeyinX bağlantı hatası:\n"+
+(error?.message||
+"Beklenmeyen bir hata oluştu.");
 
 }
 
 sendBtn.disabled=false;
-
 input.focus();
 
 }
@@ -2046,12 +1397,11 @@ input.focus();
 function sendEnter(event){
 
 if(
-event.key==="Enter" &&
+event.key==="Enter"&&
 !event.shiftKey
 ){
 
 event.preventDefault();
-
 sendMessage();
 
 }
@@ -2075,19 +1425,16 @@ JSON.stringify(chats)
 
 function loadHistory(){
 
-const history =
-document.getElementById("history");
+const history=document.getElementById("history");
 
 history.innerHTML="";
 
 if(chats.length===0){
 
 history.innerHTML=`
-
 <div class="emptyHistory">
 Henüz sohbet yok.
 </div>
-
 `;
 
 return;
@@ -2096,21 +1443,15 @@ return;
 
 chats.forEach(chat=>{
 
-const item =
-document.createElement("div");
+const item=document.createElement("div");
 
 item.className="historyItem";
 
-item.textContent =
-"💬 " + chat.title;
+item.textContent="💬 "+chat.title;
 
 item.addEventListener(
 "click",
-()=>{
-
-openChat(chat.id);
-
-}
+()=>openChat(chat.id)
 );
 
 item.addEventListener(
@@ -2150,11 +1491,7 @@ chat.id,
 
 item.addEventListener(
 "touchend",
-()=>{
-
-clearTimeout(timer);
-
-}
+()=>clearTimeout(timer)
 );
 
 history.appendChild(item);
@@ -2168,10 +1505,7 @@ history.appendChild(item);
 
 function openChat(id){
 
-const chat =
-chats.find(
-c=>c.id===id
-);
+const chat=chats.find(c=>c.id===id);
 
 if(!chat)return;
 
@@ -2186,27 +1520,18 @@ closeSidebar();
 
 /* CHAT MENÜSÜ */
 
-function showActionMenu(
-id,
-x,
-y
-){
+function showActionMenu(id,x,y){
 
 selectedChatId=id;
 
-const menu =
-document.getElementById(
-"actionMenu"
-);
+const menu=document.getElementById("actionMenu");
 
-menu.style.left =
-Math.min(
+menu.style.left=Math.min(
 x,
 window.innerWidth-230
 )+"px";
 
-menu.style.top =
-Math.min(
+menu.style.top=Math.min(
 y,
 window.innerHeight-110
 )+"px";
@@ -2220,16 +1545,13 @@ menu.classList.add("active");
 
 function renameChat(){
 
-const chat =
-chats.find(
+const chat=chats.find(
 c=>c.id===selectedChatId
 );
 
 if(!chat)return;
 
-document
-.getElementById("renameInput")
-.value=chat.title;
+document.getElementById("renameInput").value=chat.title;
 
 document
 .getElementById("actionMenu")
@@ -2244,11 +1566,9 @@ document
 
 function saveRename(){
 
-const name =
-document
+const name=document
 .getElementById("renameInput")
-.value
-.trim();
+.value.trim();
 
 if(!name){
 
@@ -2257,8 +1577,7 @@ return;
 
 }
 
-const chat =
-chats.find(
+const chat=chats.find(
 c=>c.id===selectedChatId
 );
 
@@ -2281,29 +1600,22 @@ loadHistory();
 
 function deleteChat(){
 
-if(
-selectedChatId===null
-)return;
+if(selectedChatId===null)return;
 
-const index =
-chats.findIndex(
+const index=chats.findIndex(
 c=>c.id===selectedChatId
 );
 
 if(index===-1)return;
 
-const deletedId =
-selectedChatId;
+const deletedId=selectedChatId;
 
-chats.splice(
-index,
-1
-);
+chats.splice(index,1);
 
 saveChats();
 
 if(
-currentChat &&
+currentChat&&
 currentChat.id===deletedId
 ){
 
@@ -2320,40 +1632,6 @@ document
 .classList.remove("active");
 
 loadHistory();
-
-}
-
-
-/* TÜM SOHBETLERİ SİL */
-
-function clearAllChats(){
-
-if(chats.length===0){
-
-showToast("Silinecek sohbet yok.");
-
-return;
-
-}
-
-const ok =
-confirm(
-"Tüm sohbetler silinsin mi?\n\nBu işlem geri alınamaz."
-);
-
-if(!ok)return;
-
-chats=[];
-
-currentChat=null;
-
-saveChats();
-
-showWelcome();
-
-loadHistory();
-
-showToast("Tüm sohbetler silindi.");
 
 }
 
@@ -2414,7 +1692,6 @@ localStorage.removeItem(
 );
 
 username=null;
-
 currentChat=null;
 
 document
@@ -2437,7 +1714,6 @@ document
 function escapeHTML(text){
 
 return String(text)
-
 .replace(/&/g,"&amp;")
 .replace(/</g,"&lt;")
 .replace(/>/g,"&gt;")
@@ -2453,35 +1729,26 @@ document.addEventListener(
 "click",
 event=>{
 
-const menu =
-document.getElementById(
-"actionMenu"
-);
-
-const messageMenu =
-document.getElementById(
-"messageMenu"
-);
+const menu=document.getElementById("actionMenu");
+const messageMenu=document.getElementById("messageMenu");
 
 if(
-menu.classList.contains("active") &&
+menu.classList.contains("active")&&
 !menu.contains(event.target)
 ){
 
 menu.classList.remove("active");
-
 selectedChatId=null;
 
 }
 
 if(
-messageMenu.classList.contains("active") &&
-!messageMenu.contains(event.target) &&
+messageMenu.classList.contains("active")&&
+!messageMenu.contains(event.target)&&
 !event.target.classList.contains("messageOptions")
 ){
 
 messageMenu.classList.remove("active");
-
 selectedMessageIndex=null;
 
 }
@@ -2504,14 +1771,33 @@ document
 .getElementById("actionMenu")
 .classList.remove("active");
 
-document
-.getElementById("settingsModal")
-.classList.remove("active");
-
 }
 
 }
 );
+
+
+/* PWA SERVICE WORKER */
+
+if("serviceWorker" in navigator){
+
+window.addEventListener(
+"load",
+()=>{
+
+navigator.serviceWorker.register(
+"/sw.js"
+).catch(
+error=>console.log(
+"PWA Service Worker:",
+error
+)
+);
+
+}
+);
+
+}
 
 </script>
 
