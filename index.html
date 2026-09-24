@@ -57,7 +57,10 @@ color:transparent;
 margin:8px 0 24px;
 }
 
-.nameTitle{font-size:23px;font-weight:800}
+.nameTitle{
+font-size:23px;
+font-weight:800;
+}
 
 .nameDesc{
 color:#7b8090;
@@ -120,7 +123,9 @@ font-size:23px;
 font-weight:900;
 }
 
-.logo span,.sideLogo span,.welcomeTitle span{
+.logo span,
+.sideLogo span,
+.welcomeTitle span{
 color:#696cf4;
 }
 
@@ -178,8 +183,13 @@ display:flex;
 margin-bottom:18px;
 }
 
-.message.ai{justify-content:flex-start}
-.message.user{justify-content:flex-end}
+.message.ai{
+justify-content:flex-start;
+}
+
+.message.user{
+justify-content:flex-end;
+}
 
 .bubble{
 max-width:78%;
@@ -249,6 +259,11 @@ font-size:20px;
 background:linear-gradient(135deg,#6366f1,#805cf5);
 }
 
+.sendBtn:disabled{
+opacity:.6;
+cursor:not-allowed;
+}
+
 .overlay{
 position:fixed;
 inset:0;
@@ -257,7 +272,9 @@ display:none;
 z-index:20;
 }
 
-.overlay.active{display:block}
+.overlay.active{
+display:block;
+}
 
 .sidebar{
 position:fixed;
@@ -273,7 +290,9 @@ display:flex;
 flex-direction:column;
 }
 
-.sidebar.active{left:0}
+.sidebar.active{
+left:0;
+}
 
 .sideHeader{
 height:68px;
@@ -349,7 +368,9 @@ padding:20px;
 z-index:100;
 }
 
-.modal.active{display:flex}
+.modal.active{
+display:flex;
+}
 
 .modalBox{
 width:100%;
@@ -385,7 +406,9 @@ border-radius:12px;
 font-weight:bold;
 }
 
-.cancelBtn{background:#eef0f4}
+.cancelBtn{
+background:#eef0f4;
+}
 
 .confirmBtn{
 background:#6366f1;
@@ -404,7 +427,9 @@ display:none;
 z-index:500;
 }
 
-.actionMenu.active{display:block}
+.actionMenu.active{
+display:block;
+}
 
 .actionBtn{
 width:100%;
@@ -417,20 +442,27 @@ padding:0 13px;
 font-size:14px;
 }
 
-.deleteBtn{color:#e53935}
+.deleteBtn{
+color:#e53935;
+}
 </style>
 </head>
 
 <body>
 
 <div id="nameScreen">
+
 <div class="nameBox">
 
 <div class="nameBrain">🧠</div>
 
-<div class="nameLogo">BeyinX</div>
+<div class="nameLogo">
+BeyinX
+</div>
 
-<div class="nameTitle">İsim koy</div>
+<div class="nameTitle">
+İsim koy
+</div>
 
 <div class="nameDesc">
 BeyinX seni bu isimle tanıyacak.
@@ -450,7 +482,9 @@ Devam et
 </button>
 
 </div>
+
 </div>
+
 
 <div id="app">
 
@@ -468,11 +502,13 @@ onclick="openSidebar()">
 
 </header>
 
+
 <main class="chatWrapper">
 
 <div id="chat" class="chat"></div>
 
 </main>
+
 
 <div class="inputContainer">
 
@@ -485,6 +521,7 @@ onkeydown="sendEnter(event)"
 ></textarea>
 
 <button
+id="sendBtn"
 class="sendBtn"
 onclick="sendMessage()">
 ➤
@@ -496,9 +533,17 @@ onclick="sendMessage()">
 
 </div>
 
-<div id="overlay" class="overlay" onclick="closeSidebar()"></div>
 
-<aside id="sidebar" class="sidebar">
+<div
+id="overlay"
+class="overlay"
+onclick="closeSidebar()">
+</div>
+
+
+<aside
+id="sidebar"
+class="sidebar">
 
 <div class="sideHeader">
 
@@ -514,17 +559,24 @@ onclick="closeSidebar()">
 
 </div>
 
+
 <button
 class="newChatBtn"
 onclick="newChat()">
 ＋ Yeni sohbet
 </button>
 
+
 <div class="historyTitle">
 SOHBETLER
 </div>
 
-<div id="history" class="history"></div>
+
+<div
+id="history"
+class="history">
+</div>
+
 
 <button
 class="logout"
@@ -534,11 +586,16 @@ onclick="logout()">
 
 </aside>
 
-<div id="newChatModal" class="modal">
+
+<div
+id="newChatModal"
+class="modal">
 
 <div class="modalBox">
 
-<div class="modalTitle">Yeni sohbet</div>
+<div class="modalTitle">
+Yeni sohbet
+</div>
 
 <div class="modalDesc">
 Bu sohbete bir isim koy.
@@ -571,7 +628,10 @@ Oluştur
 
 </div>
 
-<div id="renameModal" class="modal">
+
+<div
+id="renameModal"
+class="modal">
 
 <div class="modalBox">
 
@@ -610,7 +670,10 @@ Kaydet
 
 </div>
 
-<div id="actionMenu" class="actionMenu">
+
+<div
+id="actionMenu"
+class="actionMenu">
 
 <button
 class="actionBtn"
@@ -625,6 +688,7 @@ onclick="deleteChat()">
 </button>
 
 </div>
+
 
 <script>
 
@@ -644,9 +708,13 @@ let selectedChatId = null;
 
 if(username){
 
-document.getElementById("nameScreen").style.display="none";
+document
+.getElementById("nameScreen")
+.style.display="none";
 
-document.getElementById("app").style.display="flex";
+document
+.getElementById("app")
+.style.display="flex";
 
 showWelcome();
 loadHistory();
@@ -659,7 +727,10 @@ loadHistory();
 function saveName(){
 
 const name =
-document.getElementById("nameInput").value.trim();
+document
+.getElementById("nameInput")
+.value
+.trim();
 
 if(!name){
 
@@ -675,9 +746,13 @@ localStorage.setItem(
 username
 );
 
-document.getElementById("nameScreen").style.display="none";
+document
+.getElementById("nameScreen")
+.style.display="none";
 
-document.getElementById("app").style.display="flex";
+document
+.getElementById("app")
+.style.display="flex";
 
 showWelcome();
 loadHistory();
@@ -736,7 +811,7 @@ chat.appendChild(card);
 }
 
 
-/* MESAJ EKLE */
+/* MESAJ */
 
 function addMessage(text,type){
 
@@ -842,6 +917,9 @@ async function sendMessage(){
 const input =
 document.getElementById("messageInput");
 
+const sendBtn =
+document.getElementById("sendBtn");
+
 const text =
 input.value.trim();
 
@@ -890,10 +968,12 @@ saveChats();
 
 input.value="";
 
+sendBtn.disabled=true;
 
-/* AI YAZIYOR */
 
-const aiBubble =
+/* DÜŞÜNÜYOR */
+
+const thinkingBubble =
 addMessage(
 "BeyinX düşünüyor...",
 "ai"
@@ -914,49 +994,37 @@ headers:{
 },
 
 body:JSON.stringify({
+
 messages:
 currentChat.messages
+
 })
 
 }
 );
 
 
-let data;
-
-try{
-
-data =
+const data =
 await response.json();
-
-}catch{
-
-throw new Error(
-"Sunucudan geçerli cevap gelmedi."
-);
-
-}
 
 
 if(!response.ok){
 
 throw new Error(
-data.error ||
-("Sunucu hatası: " +
-response.status)
+data?.error ||
+"Sunucu hatası."
 );
 
 }
 
 
 const answer =
-data.output_text;
+String(
+data?.output_text || ""
+).trim();
 
 
-if(
-typeof answer !== "string" ||
-!answer.trim()
-){
+if(!answer){
 
 throw new Error(
 "AI cevap üretmedi."
@@ -965,35 +1033,39 @@ throw new Error(
 }
 
 
-/* AI CEVABI */
+/* DÜŞÜNÜYOR YAZISINI CEVAPLA DEĞİŞTİR */
 
-aiBubble.textContent =
-answer.trim();
+thinkingBubble.textContent =
+answer;
 
+
+/* AI MESAJINI KAYDET */
 
 currentChat.messages.push({
 
 role:"ai",
-text:answer.trim()
+text:answer
 
 });
-
 
 saveChats();
 
 
 }catch(error){
 
-console.error(
-"BeyinX API hatası:",
-error
-);
-
-aiBubble.textContent =
-"BeyinX bağlantı hatası:\n\n" +
-error.message;
+thinkingBubble.textContent =
+"BeyinX bağlantı hatası:\n" +
+(error?.message ||
+"Beklenmeyen bir hata oluştu.");
 
 }
+
+
+/* BUTONU TEKRAR AÇ */
+
+sendBtn.disabled=false;
+
+input.focus();
 
 }
 
