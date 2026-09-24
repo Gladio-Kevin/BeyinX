@@ -736,7 +736,7 @@ chat.appendChild(card);
 }
 
 
-/* MESAJ */
+/* MESAJ EKLE */
 
 function addMessage(text,type){
 
@@ -837,7 +837,7 @@ loadHistory();
 
 /* MESAJ GÖNDER */
 
-function sendMessage(){
+async function sendMessage(){
 
 const input =
 document.getElementById("messageInput");
@@ -891,28 +891,109 @@ saveChats();
 input.value="";
 
 
-/*
-   WORKER YOK.
-   API YOK.
-   Şimdilik yerel cevap.
-*/
+/* AI YAZIYOR */
 
-const answer =
-"BeyinX AI bağlantısı henüz kurulmadı.";
-
+const aiBubble =
 addMessage(
-answer,
+"BeyinX düşünüyor...",
 "ai"
 );
+
+
+try{
+
+const response =
+await fetch(
+"/.netlify/functions/chat",
+{
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+body:JSON.stringify({
+messages:
+currentChat.messages
+})
+
+}
+);
+
+
+let data;
+
+try{
+
+data =
+await response.json();
+
+}catch{
+
+throw new Error(
+"Sunucudan geçerli cevap gelmedi."
+);
+
+}
+
+
+if(!response.ok){
+
+throw new Error(
+data.error ||
+("Sunucu hatası: " +
+response.status)
+);
+
+}
+
+
+const answer =
+data.output_text;
+
+
+if(
+typeof answer !== "string" ||
+!answer.trim()
+){
+
+throw new Error(
+"AI cevap üretmedi."
+);
+
+}
+
+
+/* AI CEVABI */
+
+aiBubble.textContent =
+answer.trim();
+
 
 currentChat.messages.push({
 
 role:"ai",
-text:answer
+text:answer.trim()
 
 });
 
+
 saveChats();
+
+
+}catch(error){
+
+console.error(
+"BeyinX API hatası:",
+error
+);
+
+aiBubble.textContent =
+"BeyinX bağlantı hatası:\n\n" +
+error.message;
+
+}
 
 }
 
@@ -1367,4 +1448,4 @@ selectedChatId=null;
 </script>
 
 </body>
-  </html>
+</html>
