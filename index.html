@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#6366f1">
+<meta name="description" content="BeyinX - Yapay zeka sohbet uygulaması">
 <link rel="manifest" href="/manifest.json">
 <title>BeyinX</title>
 
@@ -556,6 +557,31 @@ opacity:1;
 transform:translateX(-50%) translateY(0);
 }
 
+/* PWA KURULUM BUTONU */
+
+.installBtn{
+position:fixed;
+right:14px;
+bottom:112px;
+z-index:15;
+display:none;
+align-items:center;
+gap:7px;
+height:45px;
+padding:0 15px;
+border:0;
+border-radius:14px;
+color:white;
+font-size:14px;
+font-weight:bold;
+background:linear-gradient(135deg,#6366f1,#8b5cf6);
+box-shadow:0 8px 25px rgba(99,102,241,.3);
+}
+
+.installBtn.show{
+display:flex;
+}
+
 @media(max-width:500px){
 
 .messageContent{
@@ -581,6 +607,13 @@ width:285px;
 
 .status{
 font-size:10px;
+}
+
+.installBtn{
+right:10px;
+bottom:112px;
+height:42px;
+font-size:13px;
 }
 
 }
@@ -641,6 +674,7 @@ onclick="openSidebar()">
 </div>
 
 <div class="status">
+
 <span
 id="statusDot"
 class="statusDot">
@@ -649,6 +683,7 @@ class="statusDot">
 <span id="statusText">
 Hazır
 </span>
+
 </div>
 
 </header>
@@ -686,6 +721,16 @@ onclick="sendMessage()">
 </div>
 
 </div>
+
+
+<!-- PWA KURULUM -->
+
+<button
+id="installBtn"
+class="installBtn"
+onclick="installBeyinX()">
+📲 BeyinX'i yükle
+</button>
 
 
 <div
@@ -894,6 +939,11 @@ let currentChat = null;
 let selectedChatId = null;
 
 let selectedMessageIndex = null;
+
+
+/* PWA */
+
+let deferredInstallPrompt = null;
 
 
 /* AÇILIŞ */
@@ -1515,12 +1565,6 @@ throw new Error(
 
 }
 
-/*
-Son 14 mesaj gönderiliyor.
-Böylece API gereksiz yere
-çok fazla token tüketmez.
-*/
-
 const recentMessages =
 currentChat.messages.slice(-14);
 
@@ -1598,9 +1642,6 @@ input.value.trim();
 
 if(!text)return;
 
-
-/* CHAT YOKSA */
-
 if(!currentChat){
 
 currentChat={
@@ -1624,9 +1665,6 @@ loadHistory();
 
 }
 
-
-/* KULLANICI */
-
 const userIndex =
 currentChat.messages.length;
 
@@ -1649,9 +1687,6 @@ saveChats();
 input.value="";
 
 sendBtn.disabled=true;
-
-
-/* AI DÜŞÜNÜYOR */
 
 const thinkingIndex =
 currentChat.messages.length;
@@ -1852,9 +1887,6 @@ event.clientY
 
 }
 );
-
-
-/* TELEFONDA UZUN BASMA */
 
 let timer;
 
@@ -2243,12 +2275,147 @@ window.addEventListener(
 ()=>{
 
 navigator.serviceWorker
-.register("/sw.js")
+.register("/sw.js",{
+scope:"/"
+})
+.then(
+registration=>{
+
+console.log(
+"BeyinX Service Worker aktif:",
+registration.scope
+);
+
+}
+)
 .catch(
-()=>{}
+error=>{
+
+console.error(
+"BeyinX Service Worker hatası:",
+error
+);
+
+}
 );
 
 });
+
+}
+
+
+/* PWA KURULUM İSTEMİ */
+
+window.addEventListener(
+"beforeinstallprompt",
+event=>{
+
+event.preventDefault();
+
+deferredInstallPrompt=event;
+
+const installBtn =
+document.getElementById(
+"installBtn"
+);
+
+installBtn.classList.add("show");
+
+}
+);
+
+
+/* PWA KUR */
+
+async function installBeyinX(){
+
+if(!deferredInstallPrompt){
+
+showToast(
+"Kurulum şu anda kullanılamıyor."
+);
+
+return;
+
+}
+
+const promptEvent =
+deferredInstallPrompt;
+
+deferredInstallPrompt=null;
+
+const installBtn =
+document.getElementById(
+"installBtn"
+);
+
+installBtn.classList.remove("show");
+
+try{
+
+await promptEvent.prompt();
+
+const result =
+await promptEvent.userChoice;
+
+if(result.outcome==="accepted"){
+
+showToast(
+"BeyinX kuruluyor ✓"
+);
+
+}else{
+
+showToast(
+"Kurulum iptal edildi."
+);
+
+}
+
+}catch(error){
+
+console.error(
+"Kurulum hatası:",
+error
+);
+
+}
+
+}
+
+
+/* PWA KURULDU */
+
+window.addEventListener(
+"appinstalled",
+()=>{
+
+deferredInstallPrompt=null;
+
+document
+.getElementById("installBtn")
+.classList.remove("show");
+
+showToast(
+"BeyinX başarıyla kuruldu ✓"
+);
+
+}
+);
+
+
+/* ZATEN UYGULAMA OLARAK AÇILDIYSA */
+
+if(
+window.matchMedia &&
+window.matchMedia(
+"(display-mode: standalone)"
+).matches
+){
+
+console.log(
+"BeyinX uygulama modunda çalışıyor."
+);
 
 }
 
