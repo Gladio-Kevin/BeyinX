@@ -1,27 +1,24 @@
 {
   "name": "BeyinX",
   "short_name": "BeyinX",
-  "description": "BeyinX - Türkçe yapay zeka asistanı",
-  "lang": "tr-TR",
+  "description": "BeyinX yapay zeka sohbet uygulaması.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f6f7fb",
-  "theme_color": "#696cf4",
-  "categories": [
-    "productivity",
-    "education"
-  ],
+  "theme_color": "#6366f1",
+  "lang": "tr",
+  "dir": "ltr",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/images/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/images/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
