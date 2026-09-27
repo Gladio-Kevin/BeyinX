@@ -1573,6 +1573,49 @@ setStatus(
 true
 );
 
+/*
+ * BEYİNX HAFIZA
+ *
+ * Kullanıcının adı ve kayıtlı tercihleri
+ * backend'e gönderilir.
+ */
+
+let preferences = [];
+
+try{
+
+preferences =
+JSON.parse(
+localStorage.getItem(
+"beyinx_preferences"
+) || "[]"
+);
+
+if(!Array.isArray(preferences)){
+preferences=[];
+}
+
+}catch{
+
+preferences=[];
+
+}
+
+const memory = {
+
+name:
+username || "",
+
+preferences:
+preferences.slice(0,10),
+
+language:
+localStorage.getItem(
+"beyinx_language"
+) || "tr"
+
+};
+
 const response =
 await fetch(
 "/.netlify/functions/chat",
@@ -1587,10 +1630,12 @@ headers:{
 body:JSON.stringify({
 
 messages:
-recentMessages
+recentMessages,
+
+memory:
+memory
 
 })
-
 }
 );
 
@@ -1619,7 +1664,6 @@ data?.error ||
 }
 
 return data;
-
 }
 
 
