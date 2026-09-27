@@ -1,6 +1,5 @@
 export default async (req) => {
   try {
-
     // =========================
     // SADECE POST
     // =========================
@@ -19,7 +18,6 @@ export default async (req) => {
       );
     }
 
-
     // =========================
     // VERİLER
     // =========================
@@ -35,7 +33,6 @@ export default async (req) => {
         ? body.memory
         : {};
 
-
     if (messages.length === 0) {
       return new Response(
         JSON.stringify({
@@ -50,13 +47,11 @@ export default async (req) => {
       );
     }
 
-
     // =========================
     // API KEY
     // =========================
 
-    const apiKey =
-      process.env.GROQ_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       return new Response(
@@ -73,19 +68,13 @@ export default async (req) => {
       );
     }
 
-
     // =========================
     // AKILLI BAĞLAM
     // =========================
 
-    // Son 14 mesajı gönderiyoruz.
-    // Böylece eski sohbetler tamamen
-    // unutulmadan TPM patlamasını
-    // azaltıyoruz.
-
-    const recentMessages =
-      messages.slice(-14);
-
+    // Gereksiz token tüketimini azaltmak
+    // için son 10 mesajı gönderiyoruz.
+    const recentMessages = messages.slice(-10);
 
     // =========================
     // KİŞİSELLEŞTİRME
@@ -99,11 +88,10 @@ export default async (req) => {
     }
 
     if (Array.isArray(memory.preferences)) {
-      const preferences =
-        memory.preferences
-          .slice(0, 10)
-          .map(x => String(x).slice(0, 150))
-          .join(", ");
+      const preferences = memory.preferences
+        .slice(0, 10)
+        .map(x => String(x).slice(0, 150))
+        .join(", ");
 
       if (preferences) {
         memoryText +=
@@ -116,17 +104,23 @@ export default async (req) => {
         `Tercih edilen dil: ${String(memory.language).slice(0, 30)}\n`;
     }
 
+    // =========================
+    // GÜNCEL TARİH
+    // =========================
+
+    const currentDate = new Date().toISOString().slice(0, 10);
 
     // =========================
     // SİSTEM MESAJI
     // =========================
 
     const systemMessage = {
-
       role: "system",
 
       content: `
-Sen BeyinX adlı Türkçe yapay zeka asistanısın.
+Sen BeyinX-AI adlı Türkçe yapay zeka asistanısın.
+
+Bugünün tarihi: ${currentDate}
 
 Kullanıcıyla doğal, samimi ve anlaşılır konuş.
 
@@ -137,7 +131,7 @@ GENEL DAVRANIŞ:
 - Gerektiğinde az miktarda emoji kullan.
 - Her cümlede emoji kullanma.
 - Gereksiz yere kendini tanıtma.
-- Kullanıcıya robotik cevaplar verme.
+- Robotik cevaplar verme.
 - Türkçe konuşuluyorsa Türkçe cevap ver.
 - Kullanıcı başka bir dile geçerse o dile uyum sağla.
 - Kullanıcının yazışma tonuna mümkün olduğunca uyum sağla.
@@ -158,7 +152,6 @@ ASCII çizgileri veya dekoratif ayraçlar kullanma.
 Örneğin:
 
 -----------
-/-----------\\
 ================
 
 gibi şeyler kullanma.
@@ -172,46 +165,101 @@ Başlık
 
 gibi temiz biçimlendirme kullan.
 
-BEYİNX KİMLİĞİ:
+BEYİNX-AI KİMLİĞİ:
 
-BeyinX'in kurucusu sorulursa:
+BeyinX-AI'nin kurucusu sorulursa:
 
-"Benim kurucum Ömer, diğer adıyla Kevin. BeyinX'i o kurdu."
+"Benim kurucum Ömer, diğer adıyla Kevin. BeyinX-AI'yi o kurdu."
 
 şeklinde doğal cevap ver.
 
-Kullanıcı BeyinX'in ne olduğunu sorarsa bunun
+Kullanıcı BeyinX-AI'nin ne olduğunu sorarsa bunun
 bir yapay zeka asistanı olduğunu açıkla.
 
-GÜNCEL BİLGİ:
+GÜNCEL BİLGİLER:
 
-Kullanıcı güncel haber, son gelişme, güncel teknoloji,
-bugünkü olaylar, güncel fiyatlar, son sürümler veya
-başka zamanla değişebilen bir bilgi sorarsa
-web aramasını kullan.
+ÇOK ÖNEMLİ:
 
-Web araması kullanıldığında bulduğun bilgileri
-kaynaklara dayanarak özetle.
+Kullanıcı güncel veya zamanla değişebilen bir bilgi
+sorarsa web aramasını kullan.
 
-Eğer güncel bilgi gerekmiyorsa gereksiz yere
-web araması yapma.
+Özellikle şu ifadeler güncel bilgi gerektirir:
+
+- bugün
+- şu an
+- şimdi
+- dün
+- yarın
+- bu hafta
+- son
+- en son
+- güncel
+- günümüzde
+- 2026
+- fiyat
+- hava durumu
+- haber
+- son gelişmeler
+- yeni sürüm
+
+Bu tür sorularda eski eğitim bilgilerine dayanarak
+cevap verme.
+
+Web araması yapmadan güncel bir bilgiyi kesinmiş gibi
+söyleme.
+
+Örneğin kullanıcı:
+
+"Bugün hava nasıl?"
+
+derse güncel hava bilgisini aramaya çalış.
+
+Ancak kullanıcının şehri veya konumu bilinmiyorsa
+şehir uydurma.
+
+Bunun yerine:
+
+"Hangi şehir için hava durumuna bakayım?"
+
+diye sor.
+
+Benzer şekilde güncel haber veya fiyat sorularında
+gerekli konum/ürün belirtilmemişse bunu netleştir.
+
+Web araması sonucundaki bilgileri kaynaklara dayanarak
+özetle.
+
+Web araması yapılamıyorsa bunu açıkça belirt ve
+eski bilgiyi güncelmiş gibi gösterme.
+
+TARİH:
+
+Bugünün tarihi ${currentDate}.
+
+Kullanıcı "bugün", "yarın", "dün" veya benzeri
+göreceli bir tarih kullanırsa bu tarihi esas al.
+
+2024 veya daha eski bir bilgiyi sırf eğitim verisinde
+bulunduğu için güncel bilgi olarak kullanma.
 
 KİŞİSELLEŞTİRME:
 
 Sana verilen kullanıcı hafızasını cevaplarını
 kişiselleştirmek için kullan.
 
-Ancak hafızada olmayan bilgileri uydurma.
+Hafızada olmayan bilgileri uydurma.
 
 DUYGUSAL TON:
 
 Kullanıcının mesajının tonuna dikkat et.
 
 Örneğin kullanıcı:
+
 - heyecanlıysa daha enerjik,
 - üzgün görünüyorsa daha sakin,
 - sinirliyse sakin ve net,
 - normal konuşuyorsa normal
+
 bir ton kullan.
 
 Ancak kullanıcı hakkında psikolojik veya tıbbi
@@ -222,8 +270,8 @@ HAFIZA:
 Önceki mesajlardan gelen bilgileri tutarlı şekilde
 kullan.
 
-Fakat emin olmadığın kişisel bilgileri gerçekmiş
-gibi söyleme.
+Fakat emin olmadığın kişisel bilgileri gerçekmiş gibi
+söyleme.
 
 TEKNİK SORULAR:
 
@@ -238,17 +286,14 @@ ${memoryText}
 `
     };
 
-
     // =========================
     // MESAJLARI TEMİZLE
     // =========================
 
     const cleanMessages = [
-
       systemMessage,
 
       ...recentMessages.map((m) => ({
-
         role:
           m.role === "ai"
             ? "assistant"
@@ -256,12 +301,9 @@ ${memoryText}
 
         content:
           String(m.text || "")
-            .slice(0, 5000)
-
+            .slice(0, 4000)
       }))
-
     ];
-
 
     // =========================
     // GROQ API
@@ -273,90 +315,66 @@ ${memoryText}
         method: "POST",
 
         headers: {
-          "Content-Type":
-            "application/json",
-
-          "Authorization":
-            `Bearer ${apiKey}`
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
         },
 
         body: JSON.stringify({
+          model: "openai/gpt-oss-120b",
 
-          model:
-            "openai/gpt-oss-120b",
+          messages: cleanMessages,
 
-          messages:
-            cleanMessages,
+          temperature: 0.6,
 
-          temperature:
-            0.7,
-
-          max_completion_tokens:
-            1200,
+          max_completion_tokens: 1000,
 
           // Güncel bilgi gerektiğinde
-          // model web aramasını kullanabilir.
+          // web araması kullanılabilir.
           tools: [
             {
-              type:
-                "browser_search"
+              type: "browser_search"
             }
           ]
-
         })
       }
     );
-
 
     // =========================
     // GROQ CEVABI
     // =========================
 
-    const data =
-      await response.json();
-
+    const data = await response.json();
 
     // =========================
     // RATE LIMIT
     // =========================
 
     if (response.status === 429) {
-
       const retryAfter =
-        response.headers.get(
-          "retry-after"
-        );
+        response.headers.get("retry-after");
 
-      let waitText =
-        "birkaç saniye";
+      let waitText = "birkaç saniye";
 
       if (retryAfter) {
-
         const seconds =
-          Math.ceil(
-            Number(retryAfter)
-          );
+          Math.ceil(Number(retryAfter));
 
         if (
           Number.isFinite(seconds) &&
           seconds > 0
         ) {
-
           waitText =
             `${seconds} saniye`;
-
         }
       }
 
       return new Response(
         JSON.stringify({
-
           error:
             `BeyinX şu anda biraz yoğun 😅\n\n` +
             `Çok fazla istek geldiği için ` +
             `kısa süreliğine beklememiz gerekiyor.\n\n` +
             `Yaklaşık ${waitText} sonra tekrar dene.`
-
         }),
         {
           status: 429,
@@ -369,13 +387,11 @@ ${memoryText}
       );
     }
 
-
     // =========================
     // DİĞER API HATALARI
     // =========================
 
     if (!response.ok) {
-
       const apiError =
         data?.error?.message || "";
 
@@ -386,15 +402,12 @@ ${memoryText}
 
       return new Response(
         JSON.stringify({
-
           error:
             "BeyinX bağlantısında geçici bir sorun oluştu. " +
             "Biraz sonra tekrar dene. 🤖"
-
         }),
         {
-          status:
-            response.status,
+          status: response.status,
 
           headers: {
             "Content-Type":
@@ -404,25 +417,22 @@ ${memoryText}
       );
     }
 
-
     // =========================
     // CEVAP
     // =========================
 
-    const answer =
-      data?.choices?.[0]
-        ?.message?.content || "";
+    const message =
+      data?.choices?.[0]?.message;
 
+    const answer =
+      message?.content || "";
 
     if (!answer.trim()) {
-
       return new Response(
         JSON.stringify({
-
           error:
             "BeyinX şu anda cevap oluşturamadı. " +
             "Tekrar deneyebilirsin."
-
         }),
         {
           status: 500,
@@ -435,29 +445,27 @@ ${memoryText}
       );
     }
 
+    // =========================
+    // WEB KULLANILDI MI?
+    // =========================
+
+    const webUsed =
+      Array.isArray(
+        message?.executed_tools
+      );
 
     // =========================
     // BAŞARILI
     // =========================
 
     return new Response(
-
       JSON.stringify({
-
         output_text:
           answer.trim(),
 
-        // Frontend isterse kullanabilir.
-        // Web araması yapıldıysa Groq'un
-        // döndürdüğü tool bilgisi burada tutulur.
         web_used:
-          Array.isArray(
-            data?.choices?.[0]
-              ?.message?.executed_tools
-          )
-
+          webUsed
       }),
-
       {
         status: 200,
 
@@ -466,27 +474,20 @@ ${memoryText}
             "application/json"
         }
       }
-
     );
 
-
   } catch (error) {
-
     console.error(
       "BeyinX backend error:",
       error
     );
 
     return new Response(
-
       JSON.stringify({
-
         error:
           "BeyinX bağlantısında beklenmeyen bir sorun oluştu. " +
           "Biraz sonra tekrar dene. 😅"
-
       }),
-
       {
         status: 500,
 
@@ -495,8 +496,6 @@ ${memoryText}
             "application/json"
         }
       }
-
     );
-
   }
 };
