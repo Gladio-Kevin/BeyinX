@@ -1,4 +1,4 @@
-const CACHE_NAME = "beyinx-v1";
+const CACHE_NAME = "beyinx-v2";
 
 const APP_FILES = [
   "/",
