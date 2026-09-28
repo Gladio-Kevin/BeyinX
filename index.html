@@ -324,6 +324,17 @@ font:16px Arial;
 background:transparent;
 }
 
+.imageBtn{width:50px;height:50px;border:0;border-radius:15px;background:#eef0ff;font-size:21px;flex-shrink:0;}
+.imageBtn:active{transform:scale(.96);}
+.imagePreview{display:none;max-width:820px;margin:0 auto 8px;padding:8px;border:1px solid #dedfea;border-radius:16px;background:rgba(255,255,255,.94);}
+.imagePreview.show{display:flex;align-items:center;gap:10px;}
+.imagePreview img{width:58px;height:58px;object-fit:cover;border-radius:11px;}
+.imagePreviewInfo{flex:1;min-width:0;}
+.imagePreviewTitle{font-size:13px;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.imagePreviewDesc{font-size:11px;color:#777d8d;margin-top:3px;}
+.imageRemoveBtn{width:34px;height:34px;border:0;border-radius:10px;background:#f0f1f6;font-size:18px;}
+.bubbleImage{display:block;max-width:260px;max-height:260px;width:auto;height:auto;object-fit:contain;border-radius:14px;margin-bottom:8px;}
+
 .sendBtn{
 width:50px;
 height:50px;
@@ -701,7 +712,20 @@ class="chat">
 
 <div class="inputContainer">
 
+<div id="imagePreview" class="imagePreview">
+<img id="imagePreviewImg" alt="Seçilen görsel">
+<div class="imagePreviewInfo">
+<div id="imagePreviewTitle" class="imagePreviewTitle">Görsel seçildi</div>
+<div class="imagePreviewDesc">BeyinX bu görseli analiz edecek.</div>
+</div>
+<button class="imageRemoveBtn" type="button" onclick="clearSelectedImage()">×</button>
+</div>
+
 <div class="inputBox">
+
+<button id="imageBtn" class="imageBtn" type="button" title="Görsel ekle" onclick="document.getElementById('imageInput').click()">🖼️</button>
+
+<input id="imageInput" type="file" accept="image/*" hidden onchange="handleImageSelect(event)">
 
 <textarea
 id="messageInput"
@@ -940,6 +964,9 @@ let selectedChatId = null;
 
 let selectedMessageIndex = null;
 
+let selectedImage = null;
+let selectedImageName = "";
+
 
 /* PWA */
 
@@ -1104,77 +1131,35 @@ toast.classList.remove("show");
 
 /* MESAJ EKLE */
 
-function addMessage(
-text,
-type,
-messageIndex=null
-){
-
-const chat =
-document.getElementById("chat");
-
-const message =
-document.createElement("div");
-
-message.className =
-"message " + type;
-
-const content =
-document.createElement("div");
-
+function addMessage(text,type,messageIndex=null,image=null){
+const chat=document.getElementById("chat");
+const message=document.createElement("div");
+message.className="message " + type;
+const content=document.createElement("div");
 content.className="messageContent";
-
-const bubble =
-document.createElement("div");
-
+if(image){
+const imageEl=document.createElement("img");
+imageEl.className="bubbleImage";
+imageEl.src=image;
+imageEl.alt="Gönderilen görsel";
+content.appendChild(imageEl);
+}
+if(String(text || "").trim()){
+const bubble=document.createElement("div");
 bubble.className="bubble";
-
-bubble.textContent =
-String(text).trim();
-
+bubble.textContent=String(text).trim();
 content.appendChild(bubble);
-
-const options =
-document.createElement("button");
-
+}
+const options=document.createElement("button");
 options.className="messageOptions";
-
 options.textContent="⋮";
-
 options.title="Mesaj seçenekleri";
-
-options.onclick=(event)=>{
-
-event.stopPropagation();
-
-showMessageMenu(
-messageIndex,
-type,
-options
-);
-
-};
-
+options.onclick=(event)=>{event.stopPropagation();showMessageMenu(messageIndex,type,options);};
 message.appendChild(content);
-
 message.appendChild(options);
-
 chat.appendChild(message);
-
-setTimeout(()=>{
-
-const wrapper =
-document.querySelector(
-".chatWrapper"
-);
-
-wrapper.scrollTop =
-wrapper.scrollHeight;
-
-},20);
-
-return bubble;
-
+setTimeout(()=>{const wrapper=document.querySelector(".chatWrapper");wrapper.scrollTop=wrapper.scrollHeight;},20);
+return content.querySelector(".bubble") || content;
 }
 
 
@@ -1476,7 +1461,8 @@ currentChat.messages.forEach(
 addMessage(
 message.text,
 message.role,
-index
+index,
+message.image || null
 );
 
 }
@@ -1667,7 +1653,46 @@ return data;
 }
 
 
+/* GÖRSEL SEÇİMİ */
+
+function handleImageSelect(event){
+const file=event.target.files?.[0];
+if(!file)return;
+if(!file.type.startsWith("image/")){showToast("Sadece görsel seçebilirsin.");event.target.value="";return;}
+if(file.size>10*1024*1024){showToast("Görsel 10 MB'dan küçük olmalı.");event.target.value="";return;}
+const reader=new FileReader();
+reader.onload=()=>{compressImage(String(reader.result),1200,0.82).then(dataUrl=>{
+selectedImage=dataUrl;selectedImageName=file.name;
+document.getElementById("imagePreviewImg").src=dataUrl;
+document.getElementById("imagePreviewTitle").textContent=file.name;
+document.getElementById("imagePreview").classList.add("show");
+}).catch(()=>showToast("Görsel hazırlanamadı."));};
+reader.readAsDataURL(file);
+}
+
+function compressImage(dataUrl,maxSize,quality){
+return new Promise((resolve,reject)=>{
+const img=new Image();
+img.onload=()=>{
+let width=img.naturalWidth,height=img.naturalHeight;
+const scale=Math.min(1,maxSize/Math.max(width,height));
+width=Math.max(1,Math.round(width*scale));height=Math.max(1,Math.round(height*scale));
+const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
+const ctx=canvas.getContext("2d");if(!ctx){reject(new Error("Görsel hazırlanamadı."));return;}
+ctx.drawImage(img,0,0,width,height);resolve(canvas.toDataURL("image/jpeg",quality));
+};img.onerror=reject;img.src=dataUrl;
+});
+}
+
+function clearSelectedImage(){
+selectedImage=null;selectedImageName="";
+const input=document.getElementById("imageInput");const preview=document.getElementById("imagePreview");
+if(input)input.value="";if(preview)preview.classList.remove("show");
+}
+
+
 /* MESAJ GÖNDER */
+
 
 async function sendMessage(){
 
@@ -1684,7 +1709,10 @@ document.getElementById(
 const text =
 input.value.trim();
 
-if(!text)return;
+if(!text && !selectedImage){
+showToast("Mesaj veya görsel ekle.");
+return;
+}
 
 if(!currentChat){
 
@@ -1713,22 +1741,22 @@ const userIndex =
 currentChat.messages.length;
 
 currentChat.messages.push({
-
 role:"user",
-
-text:text
-
+text:text,
+image:selectedImage || null
 });
 
 addMessage(
 text,
 "user",
-userIndex
+userIndex,
+selectedImage || null
 );
 
 saveChats();
 
 input.value="";
+clearSelectedImage();
 
 sendBtn.disabled=true;
 
