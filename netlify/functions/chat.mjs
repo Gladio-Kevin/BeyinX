@@ -34,12 +34,14 @@ export default async (req) => {
         ? body.memory
         : {};
 
+    // Frontend'den gelen sıkıştırılmış base64 görsel
     const image =
-      typeof body.image === "string"
+      typeof body.image === "string" &&
+      body.image.startsWith("data:image/")
         ? body.image
         : null;
 
-    if (messages.length === 0 && !image) {
+    if (messages.length === 0) {
       return new Response(
         JSON.stringify({
           error: "Gönderilecek mesaj bulunamadı."
@@ -62,7 +64,8 @@ export default async (req) => {
     if (!apiKey) {
       return new Response(
         JSON.stringify({
-          error: "BeyinX AI bağlantısı yapılandırılmamış."
+          error:
+            "BeyinX AI bağlantısı yapılandırılmamış."
         }),
         {
           status: 500,
@@ -72,6 +75,13 @@ export default async (req) => {
         }
       );
     }
+
+    // =========================
+    // MESAJLAR
+    // =========================
+
+    const recentMessages =
+      messages.slice(-10);
 
     // =========================
     // HAFIZA
@@ -86,10 +96,11 @@ export default async (req) => {
 
     if (Array.isArray(memory.preferences)) {
 
-      const preferences = memory.preferences
-        .slice(0, 20)
-        .map(x => String(x).slice(0, 200))
-        .join(", ");
+      const preferences =
+        memory.preferences
+          .slice(0, 20)
+          .map(x => String(x).slice(0, 200))
+          .join(", ");
 
       if (preferences) {
         memoryText +=
@@ -110,14 +121,7 @@ export default async (req) => {
       new Date().toISOString().slice(0, 10);
 
     // =========================
-    // SON MESAJLAR
-    // =========================
-
-    const recentMessages =
-      messages.slice(-20);
-
-    // =========================
-    // SİSTEM MESAJI
+    // SİSTEM
     // =========================
 
     const systemMessage = {
@@ -130,109 +134,105 @@ Bugünün tarihi: ${currentDate}
 
 Kullanıcıyla doğal, samimi ve anlaşılır konuş.
 
-GENEL:
+GENEL DAVRANIŞ:
 
 - Kısa soruya kısa cevap ver.
 - Detay istenirse detaylandır.
-- Türkçe konuşuluyorsa Türkçe konuş.
+- Gereksiz robotik konuşma yapma.
 - Kullanıcının konuşma tarzına uyum sağla.
-- Gereksiz emoji kullanma.
-- Robotik cevap verme.
-- Bilmediğin şeyi uydurma.
-
-KİMLİK:
-
-BeyinX-AI'nin kurucusu sorulursa:
-
-"Benim kurucum Ömer, diğer adıyla Kevin. BeyinX-AI'yi o kurdu."
-
-de.
+- Türkçe konuşuluyorsa Türkçe cevap ver.
+- Kullanıcı başka dile geçerse o dile uyum sağla.
+- Gerektiğinde az miktarda emoji kullan.
 
 HAFIZA:
 
 Sana verilen kullanıcı hafızasını kullan.
 
-Özellikle kullanıcı daha önce:
-- Minecraft oynadığını,
-- HTML ile uğraştığını,
-- BeyinX geliştirdiğini
-gibi bilgileri hafızada tutuyorsa bunları unutmuş gibi davranma.
+Hafızada bulunan bilgileri sonraki konuşmalarda
+tutarlı şekilde hatırla.
 
 Hafızada olmayan bilgileri uydurma.
 
-Kullanıcı yeni bir sohbete geçtiğinde bile backend'e gönderilen
-hafıza bilgilerini kullan.
+Örneğin kullanıcı daha önce Minecraft oynadığını
+söylediyse ve bu bilgi hafızada bulunuyorsa,
+sonraki sohbetlerde bunu tekrar sorma.
 
-KULLANICI HAFIZASI:
+Kullanıcının hafızasında:
+${memoryText}
 
-${memoryText || "Kayıtlı ek kullanıcı hafızası yok."}
+GÖRSEL ANALİZ:
 
-WEB ARAŞTIRMASI:
+Kullanıcı bir görsel gönderirse görseli analiz et.
 
-Güncel bilgi gerektiğinde web araştırmasını kullan.
+Görselde:
+- yazıları,
+- oyunları,
+- Minecraft ekranlarını,
+- arayüzleri,
+- nesneleri,
+- genel görüntüyü
+
+mümkün olduğunca doğru şekilde açıklayabilirsin.
+
+Görsel gönderildiğinde "görseli alamadım" gibi
+bir cevap verme.
+
+Görsel gerçekten modele ulaşmadıysa bunu belirt.
+
+Kullanıcı görseldeki bir oyunun adını sorarsa,
+görseldeki ipuçlarından hareketle cevap ver.
+
+GÜNCEL BİLGİLER:
+
+Güncel bilgi gerektiğinde web aramasını kullan.
 
 Özellikle:
-
 - bugün
 - şu an
 - şimdi
 - dün
 - yarın
-- son
-- en son
 - güncel
+- en son
 - 2026
 - haber
 - fiyat
 - hava durumu
 - yeni sürüm
-- son gelişmeler
 
-gibi ifadelerde güncel bilgi gerekiyorsa web araması yap.
+gibi ifadelerde güncel bilgi gerektiğini düşün.
 
-Web araması sonucunda elde edilen bilgileri kendi
-cevabınmış gibi uydurma.
+Web araması kullanıldığında elde edilen bilgileri
+kaynaklara dayanarak özetle.
 
-Kaynaklardan gelen bilgileri doğru şekilde özetle.
+Web kullanılamıyorsa bunu açıkça belirt.
 
-Web araştırması gerekiyorsa araştır.
+BEYİNX KİMLİĞİ:
 
-GÖRSEL:
+BeyinX-AI'nin kurucusu sorulursa:
 
-Kullanıcı bir görsel gönderirse görseli analiz et.
+"Benim kurucum Ömer, diğer adıyla Kevin. BeyinX-AI'yi o kurdu."
 
-Görselde:
-- yazı
-- Minecraft görüntüsü
-- hata mesajı
-- web sitesi
-- kod
-- nesne
-- ekran görüntüsü
+şeklinde cevap ver.
 
-gibi şeyler varsa bunları mümkün olduğunca incele.
+TEKNİK KONULAR:
 
-Kullanıcı "bu fotoğrafta ne var?" derse doğrudan görseli analiz et.
+HTML, JavaScript, Minecraft ve benzeri teknik
+konularda doğrudan uygulanabilir cevaplar ver.
 
-Görsel hakkında emin olmadığın şeyleri kesinmiş gibi söyleme.
-
-TEKNİK:
-
-Kod, HTML, JavaScript, Minecraft veya web sitesi
-konularında doğrudan ve uygulanabilir cevap ver.
-
-Kullanıcı "kodu ver" derse kodu ver.
-
-${memoryText}
+Kullanıcı "kodu ver" derse mümkün olduğunca
+doğrudan kodu ver.
 `
     };
 
     // =========================
-    // NORMAL MESAJLAR
+    // MESAJLARI OLUŞTUR
     // =========================
 
-    const cleanMessages =
-      recentMessages.map((m) => ({
+    const cleanMessages = [
+      systemMessage,
+
+      ...recentMessages.map(m => ({
         role:
           m.role === "ai"
             ? "assistant"
@@ -240,8 +240,9 @@ ${memoryText}
 
         content:
           String(m.text || "")
-            .slice(0, 5000)
-      }));
+            .slice(0, 4000)
+      }))
+    ];
 
     // =========================
     // GÖRSEL VARSA
@@ -249,138 +250,62 @@ ${memoryText}
 
     if (image) {
 
-      const lastUserText =
-        [...recentMessages]
-          .reverse()
-          .find(m => m.role !== "ai")
-          ?.text || "Bu görseli analiz et.";
+      const lastUserIndex =
+        cleanMessages.length - 1;
 
-      const visionMessages = [
+      if (
+        cleanMessages[lastUserIndex] &&
+        cleanMessages[lastUserIndex].role === "user"
+      ) {
 
-        systemMessage,
+        const userText =
+          cleanMessages[lastUserIndex].content;
 
-        ...cleanMessages.slice(0, -1),
+        cleanMessages[lastUserIndex] = {
 
-        {
           role: "user",
 
           content: [
+
             {
               type: "text",
-              text: String(lastUserText).slice(0, 4000)
+
+              text:
+                userText ||
+                "Bu görseli analiz et."
             },
 
             {
               type: "image_url",
+
               image_url: {
                 url: image
               }
             }
+
           ]
-        }
 
-      ];
+        };
 
-      const response = await fetch(
-        "https://api.groq.com/openai/v1/chat/completions",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`
-          },
-
-          body: JSON.stringify({
-
-            model:
-              "meta-llama/llama-4-scout-17b-16e-instruct",
-
-            messages:
-              visionMessages,
-
-            temperature: 0.5,
-
-            max_completion_tokens: 1200
-          })
-        }
-      );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-
-        console.error(
-          "Groq Vision:",
-          data?.error?.message || data
-        );
-
-        return new Response(
-          JSON.stringify({
-            error:
-              "Görsel analiz edilirken bir sorun oluştu."
-          }),
-          {
-            status: response.status,
-            headers: {
-              "Content-Type":
-                "application/json"
-            }
-          }
-        );
       }
 
-      const answer =
-        data?.choices?.[0]?.message?.content || "";
-
-      if (!answer.trim()) {
-
-        return new Response(
-          JSON.stringify({
-            error:
-              "Görsel hakkında cevap oluşturulamadı."
-          }),
-          {
-            status: 500,
-            headers: {
-              "Content-Type":
-                "application/json"
-            }
-          }
-        );
-      }
-
-      return new Response(
-        JSON.stringify({
-
-          output_text:
-            answer.trim(),
-
-          web_used: false,
-
-          image_used: true
-
-        }),
-        {
-          status: 200,
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
     }
 
     // =========================
-    // NORMAL / WEB CEVABI
+    // MODEL
     // =========================
 
-    const finalMessages = [
-      systemMessage,
-      ...cleanMessages
-    ];
+    // Görsel varsa vision destekli model,
+    // yoksa normal model kullanıyoruz.
+
+    const model =
+      image
+        ? "meta-llama/llama-4-scout-17b-16e-instruct"
+        : "openai/gpt-oss-120b";
+
+    // =========================
+    // GROQ
+    // =========================
 
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -388,34 +313,29 @@ ${memoryText}
         method: "POST",
 
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
+          "Content-Type":
+            "application/json",
+
+          "Authorization":
+            `Bearer ${apiKey}`
         },
 
         body: JSON.stringify({
 
-          model:
-            "openai/gpt-oss-120b",
+          model,
 
           messages:
-            finalMessages,
+            cleanMessages,
 
-          temperature: 0.6,
+          temperature:
+            0.6,
 
-          max_completion_tokens: 1200,
+          max_completion_tokens:
+            1200
 
-          tools: [
-            {
-              type: "browser_search"
-            }
-          ]
         })
       }
     );
-
-    // =========================
-    // GROQ CEVABI
-    // =========================
 
     const data =
       await response.json();
@@ -427,7 +347,9 @@ ${memoryText}
     if (response.status === 429) {
 
       const retryAfter =
-        response.headers.get("retry-after");
+        response.headers.get(
+          "retry-after"
+        );
 
       let waitText =
         "birkaç saniye";
@@ -435,7 +357,9 @@ ${memoryText}
       if (retryAfter) {
 
         const seconds =
-          Math.ceil(Number(retryAfter));
+          Math.ceil(
+            Number(retryAfter)
+          );
 
         if (
           Number.isFinite(seconds) &&
@@ -444,6 +368,7 @@ ${memoryText}
           waitText =
             `${seconds} saniye`;
         }
+
       }
 
       return new Response(
@@ -463,6 +388,7 @@ ${memoryText}
           }
         }
       );
+
     }
 
     // =========================
@@ -471,19 +397,25 @@ ${memoryText}
 
     if (!response.ok) {
 
+      const apiError =
+        data?.error?.message || "";
+
       console.error(
         "Groq API:",
-        data?.error?.message || data
+        apiError
       );
 
       return new Response(
         JSON.stringify({
+
           error:
             "BeyinX bağlantısında geçici bir sorun oluştu. " +
             "Biraz sonra tekrar dene. 🤖"
+
         }),
         {
-          status: response.status,
+          status:
+            response.status,
 
           headers: {
             "Content-Type":
@@ -491,6 +423,7 @@ ${memoryText}
           }
         }
       );
+
     }
 
     // =========================
@@ -507,8 +440,11 @@ ${memoryText}
 
       return new Response(
         JSON.stringify({
+
           error:
-            "BeyinX şu anda cevap oluşturamadı."
+            "BeyinX şu anda cevap oluşturamadı. " +
+            "Tekrar deneyebilirsin."
+
         }),
         {
           status: 500,
@@ -519,17 +455,8 @@ ${memoryText}
           }
         }
       );
+
     }
-
-    // =========================
-    // WEB KONTROLÜ
-    // =========================
-
-    const webUsed =
-      Array.isArray(
-        message?.executed_tools
-      ) &&
-      message.executed_tools.length > 0;
 
     // =========================
     // BAŞARILI
@@ -542,10 +469,10 @@ ${memoryText}
           answer.trim(),
 
         web_used:
-          webUsed,
+          false,
 
         image_used:
-          false
+          Boolean(image)
 
       }),
       {
@@ -567,9 +494,11 @@ ${memoryText}
 
     return new Response(
       JSON.stringify({
+
         error:
           "BeyinX bağlantısında beklenmeyen bir sorun oluştu. " +
           "Biraz sonra tekrar dene. 😅"
+
       }),
       {
         status: 500,
@@ -580,5 +509,6 @@ ${memoryText}
         }
       }
     );
+
   }
 };
