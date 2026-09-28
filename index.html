@@ -312,6 +312,76 @@ border-radius:22px;
 box-shadow:0 10px 35px rgba(60,65,110,.1);
 }
 
+.attachBtn,
+.voiceBtn{
+width:46px;
+height:46px;
+flex:0 0 46px;
+border:0;
+border-radius:14px;
+background:#eef0f7;
+color:#303449;
+font-size:20px;
+display:flex;
+align-items:center;
+justify-content:center;
+margin:0 3px 3px 0;
+}
+
+.attachBtn:active,
+.voiceBtn:active{
+transform:scale(.95);
+}
+
+.imagePreview{
+display:none;
+max-width:820px;
+margin:0 auto 8px;
+padding:8px 10px;
+background:rgba(255,255,255,.96);
+border:1px solid #dedfea;
+border-radius:15px;
+align-items:center;
+gap:9px;
+box-shadow:0 6px 20px rgba(60,65,110,.08);
+}
+
+.imagePreview.show{
+display:flex;
+}
+
+.imagePreview img{
+width:48px;
+height:48px;
+object-fit:cover;
+border-radius:10px;
+}
+
+.previewName{
+font-size:13px;
+flex:1;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+
+.removeImage{
+width:34px;
+height:34px;
+border:0;
+border-radius:10px;
+background:#f0f1f6;
+font-size:22px;
+}
+
+.memoryHint{
+max-width:820px;
+margin:5px auto 0;
+font-size:11px;
+color:#8b8f9e;
+text-align:center;
+}
+
 textarea{
 flex:1;
 min-height:62px;
@@ -1737,7 +1807,13 @@ addMessage(
 thinkingIndex
 );
 
+const webLikely = /\b(bugün|şu an|şimdi|dün|yarın|bu hafta|son|en son|güncel|2026|fiyat|haber|hava durumu|sürüm|son gelişmeler|kim kazandı|kaç para|kur)\b/i.test(text);
+
+if(webLikely){
+setStatus("🌐 Web'de araştırıyor...",true);
+}else{
 setStatus("Düşünüyor...",true);
+}
 
 try{
 
@@ -1942,72 +2018,61 @@ recognition.start();
 
 function processMemoryCommand(text){
 
-const lower=text.toLocaleLowerCase("tr-TR");
+const trimmed=text.trim();
+const lower=trimmed.toLocaleLowerCase("tr-TR");
+
+let value="";
+let mode="";
 
 if(lower.startsWith("bunu hatırla:")){
+mode="add";
+value=trimmed.substring(trimmed.indexOf(":")+1).trim();
+}
+else if(lower.startsWith("bunu hatırla ")){
+mode="add";
+value=trimmed.substring("bunu hatırla".length).trim();
+}
+else if(lower.startsWith("bunu unut:")){
+mode="remove";
+value=trimmed.substring(trimmed.indexOf(":")+1).trim();
+}
+else if(lower.startsWith("bunu unut ")){
+mode="remove";
+value=trimmed.substring("bunu unut".length).trim();
+}
+else{
+return false;
+}
 
-const value=
-text.substring(text.indexOf(":")+1).trim();
-
-if(!value)return false;
+if(!value){
+showToast("Hafızaya eklenecek bilgiyi yaz.");
+return true;
+}
 
 let memory=[];
-
 try{
-memory=JSON.parse(
-localStorage.getItem("beyinx_long_memory") || "[]"
-);
+memory=JSON.parse(localStorage.getItem("beyinx_long_memory") || "[]");
+if(!Array.isArray(memory)) memory=[];
 }catch{
 memory=[];
 }
 
-if(!Array.isArray(memory))memory=[];
-
-if(!memory.includes(value)){
+if(mode==="add"){
+if(!memory.some(x=>String(x).toLocaleLowerCase("tr-TR")===value.toLocaleLowerCase("tr-TR"))){
 memory.unshift(value);
 memory=memory.slice(0,30);
-
-localStorage.setItem(
-"beyinx_long_memory",
-JSON.stringify(memory)
-);
-
+localStorage.setItem("beyinx_long_memory",JSON.stringify(memory));
 showToast("Hafızaya kaydedildi ✓");
+}else{
+showToast("Bu bilgi zaten hafızada ✓");
 }
-
 return true;
 }
 
-if(lower.startsWith("bunu unut:")){
-
-const value=
-text.substring(text.indexOf(":")+1).trim();
-
-let memory=[];
-
-try{
-memory=JSON.parse(
-localStorage.getItem("beyinx_long_memory") || "[]"
-);
-}catch{
-memory=[];
-}
-
-memory=memory.filter(
-x=>x.toLocaleLowerCase("tr-TR") !==
-value.toLocaleLowerCase("tr-TR")
-);
-
-localStorage.setItem(
-"beyinx_long_memory",
-JSON.stringify(memory)
-);
-
+memory=memory.filter(x=>String(x).toLocaleLowerCase("tr-TR")!==value.toLocaleLowerCase("tr-TR"));
+localStorage.setItem("beyinx_long_memory",JSON.stringify(memory));
 showToast("Hafızadan silindi ✓");
 return true;
-}
-
-return false;
 }
 
 
