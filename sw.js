@@ -1,4 +1,4 @@
-const CACHE_NAME = "beyinx-v2";
+const CACHE_NAME = "beyinx-v3";
 
 const APP_FILES = [
   "/",
@@ -20,18 +20,33 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+        keys.map(key => caches.delete(key))
       );
+    }).then(() => {
+      return self.clients.claim();
     })
   );
-
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
+
+  // HTML dosyalarını HER ZAMAN Netlify'dan al
+  if (
+    event.request.mode === "navigate" ||
+    event.request.url.endsWith("/") ||
+    event.request.url.includes("/index.html")
+  ) {
+    event.respondWith(
+      fetch(event.request, {
+        cache: "no-store"
+      }).catch(() => {
+        return caches.match("/index.html");
+      })
+    );
+
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(cached => {
@@ -41,6 +56,7 @@ self.addEventListener("fetch", event => {
 
       return fetch(event.request)
         .then(response => {
+
           if (!response || response.status !== 200) {
             return response;
           }
