@@ -1,5 +1,6 @@
 export default async (req) => {
   try {
+
     // =========================
     // SADECE POST
     // =========================
@@ -29,7 +30,8 @@ export default async (req) => {
       : [];
 
     const memory =
-      body.memory && typeof body.memory === "object"
+      body.memory &&
+      typeof body.memory === "object"
         ? body.memory
         : {};
 
@@ -51,7 +53,8 @@ export default async (req) => {
     // API KEY
     // =========================
 
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey =
+      process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       return new Response(
@@ -69,29 +72,50 @@ export default async (req) => {
     }
 
     // =========================
-    // AKILLI BAĞLAM
+    // SON MESAJLAR
     // =========================
 
-    // Gereksiz token tüketimini azaltmak
-    // için son 10 mesajı gönderiyoruz.
-    const recentMessages = messages.slice(-10);
+    const recentMessages =
+      messages.slice(-14);
 
     // =========================
-    // KİŞİSELLEŞTİRME
+    // GÖRSEL KONTROLÜ
+    // =========================
+
+    const hasImage =
+      recentMessages.some(
+        (message) =>
+          typeof message?.image === "string" &&
+          message.image.startsWith("data:image/")
+      );
+
+    // =========================
+    // HAFIZA
     // =========================
 
     let memoryText = "";
 
     if (memory.name) {
       memoryText +=
-        `Kullanıcının adı: ${String(memory.name).slice(0, 50)}\n`;
+        `Kullanıcının adı: ${String(
+          memory.name
+        ).slice(0, 50)}\n`;
     }
 
-    if (Array.isArray(memory.preferences)) {
-      const preferences = memory.preferences
-        .slice(0, 10)
-        .map(x => String(x).slice(0, 150))
-        .join(", ");
+    if (
+      Array.isArray(
+        memory.preferences
+      )
+    ) {
+
+      const preferences =
+        memory.preferences
+          .slice(0, 20)
+          .map(
+            (item) =>
+              String(item).slice(0, 200)
+          )
+          .join(", ");
 
       if (preferences) {
         memoryText +=
@@ -99,91 +123,107 @@ export default async (req) => {
       }
     }
 
-    if (memory.language) {
-      memoryText +=
-        `Tercih edilen dil: ${String(memory.language).slice(0, 30)}\n`;
+    // =========================
+    // UZUN SÜRELİ HAFIZA
+    // =========================
+
+    if (
+      Array.isArray(
+        memory.long_memory
+      )
+    ) {
+
+      const longMemory =
+        memory.long_memory
+          .slice(0, 30)
+          .map(
+            (item) =>
+              String(item).slice(0, 300)
+          );
+
+      if (longMemory.length > 0) {
+
+        memoryText +=
+          `Uzun süreli kullanıcı hafızası:\n`;
+
+        for (const item of longMemory) {
+          memoryText +=
+            `- ${item}\n`;
+        }
+      }
     }
 
     // =========================
-    // GÜNCEL TARİH
+    // DİL
     // =========================
 
-    const currentDate = new Date().toISOString().slice(0, 10);
+    if (memory.language) {
+
+      memoryText +=
+        `Tercih edilen dil: ${String(
+          memory.language
+        ).slice(0, 30)}\n`;
+    }
+
+    // =========================
+    // TARİH
+    // =========================
+
+    const currentDate =
+      new Date()
+        .toISOString()
+        .slice(0, 10);
 
     // =========================
     // SİSTEM MESAJI
     // =========================
 
     const systemMessage = {
+
       role: "system",
 
       content: `
 Sen BeyinX-AI adlı Türkçe yapay zeka asistanısın.
 
-Bugünün tarihi: ${currentDate}
+Bugünün tarihi:
+${currentDate}
 
 Kullanıcıyla doğal, samimi ve anlaşılır konuş.
 
 GENEL DAVRANIŞ:
 
-- Kullanıcı kısa sorarsa kısa cevap ver.
-- Detay isterse detaylı cevap ver.
-- Gerektiğinde az miktarda emoji kullan.
-- Her cümlede emoji kullanma.
-- Gereksiz yere kendini tanıtma.
-- Robotik cevaplar verme.
+- Kısa soruya kısa cevap ver.
+- Detay istenirse detaylı cevap ver.
+- Gereksiz uzun konuşma yapma.
+- Robotik cevap verme.
 - Türkçe konuşuluyorsa Türkçe cevap ver.
-- Kullanıcı başka bir dile geçerse o dile uyum sağla.
-- Kullanıcının yazışma tonuna mümkün olduğunca uyum sağla.
+- Kullanıcı başka dile geçerse o dile geç.
+- Kullanıcının konuşma tarzına uyum sağla.
+- Kullanıcı argo kullanıyorsa bağlama uygun şekilde doğal konuşabilirsin.
+- Gereksiz emoji kullanma.
 
-EMOJİ:
+TÜRKÇE:
 
-Uygun yerlerde:
-🙂 😄 🤔 💡 👍 🔥 🚀 🧠
+Türkçe deyimleri, günlük konuşmayı, internet dilini,
+kısaltmaları ve yaygın argoyu bağlama göre anlamaya çalış.
 
-kullanabilirsin.
+Kullanıcının söylediği bir şeyi yanlış anladığında
+uydurma yapmak yerine netleştir.
 
-Ancak emojileri abartma.
-
-BİÇİMLENDİRME:
-
-ASCII çizgileri veya dekoratif ayraçlar kullanma.
-
-Örneğin:
-
------------
-================
-
-gibi şeyler kullanma.
-
-Bunun yerine:
-
-Başlık
-
-• Madde
-• Madde
-
-gibi temiz biçimlendirme kullan.
-
-BEYİNX-AI KİMLİĞİ:
+BEYİNX KİMLİĞİ:
 
 BeyinX-AI'nin kurucusu sorulursa:
 
 "Benim kurucum Ömer, diğer adıyla Kevin. BeyinX-AI'yi o kurdu."
 
-şeklinde doğal cevap ver.
-
-Kullanıcı BeyinX-AI'nin ne olduğunu sorarsa bunun
-bir yapay zeka asistanı olduğunu açıkla.
+şeklinde cevap ver.
 
 GÜNCEL BİLGİLER:
 
-ÇOK ÖNEMLİ:
+Güncel veya değişebilen bilgiler için web aramasını
+kullan.
 
-Kullanıcı güncel veya zamanla değişebilen bir bilgi
-sorarsa web aramasını kullan.
-
-Özellikle şu ifadeler güncel bilgi gerektirir:
+Özellikle:
 
 - bugün
 - şu an
@@ -194,93 +234,93 @@ sorarsa web aramasını kullan.
 - son
 - en son
 - güncel
-- günümüzde
 - 2026
 - fiyat
-- hava durumu
 - haber
-- son gelişmeler
+- hava durumu
 - yeni sürüm
+- son gelişmeler
 
-Bu tür sorularda eski eğitim bilgilerine dayanarak
-cevap verme.
+gibi ifadeler güncel bilgi gerektirebilir.
 
-Web araması yapmadan güncel bir bilgiyi kesinmiş gibi
-söyleme.
+Web araması yapmadan güncel bilgiyi kesinmiş gibi
+sunma.
 
-Örneğin kullanıcı:
+Görüşme sırasında web araması sonucu geldiyse
+sonuçları açık ve anlaşılır şekilde özetle.
 
-"Bugün hava nasıl?"
+WEB KAYNAKLARI:
 
-derse güncel hava bilgisini aramaya çalış.
+Web araştırması yaptığında mümkün olduğunca
+bilginin hangi kaynaktan geldiğini belirt.
 
-Ancak kullanıcının şehri veya konumu bilinmiyorsa
-şehir uydurma.
+GÖRSEL ANALİZ:
 
-Bunun yerine:
+Kullanıcı görsel gönderirse görseli incele.
 
-"Hangi şehir için hava durumuna bakayım?"
+Görselde:
 
-diye sor.
+- nesneleri
+- yazıları
+- ekran görüntülerini
+- grafikleri
+- Minecraft görüntülerini
+- web sitelerini
+- fotoğrafları
 
-Benzer şekilde güncel haber veya fiyat sorularında
-gerekli konum/ürün belirtilmemişse bunu netleştir.
+analiz edebilirsin.
 
-Web araması sonucundaki bilgileri kaynaklara dayanarak
-özetle.
+Görselde okunamayan veya kesin olmayan bir şey varsa
+uydurma.
 
-Web araması yapılamıyorsa bunu açıkça belirt ve
-eski bilgiyi güncelmiş gibi gösterme.
+Kullanıcı görselle ilgili belirli bir soru sorarsa
+öncelikle o soruya cevap ver.
 
-TARİH:
+UZUN SÜRELİ HAFIZA:
 
-Bugünün tarihi ${currentDate}.
+Sana verilen "Uzun süreli kullanıcı hafızası"
+bilgilerini cevaplarını kişiselleştirmek için kullan.
 
-Kullanıcı "bugün", "yarın", "dün" veya benzeri
-göreceli bir tarih kullanırsa bu tarihi esas al.
+Hafızada olmayan kişisel bilgileri uydurma.
 
-2024 veya daha eski bir bilgiyi sırf eğitim verisinde
-bulunduğu için güncel bilgi olarak kullanma.
+Kullanıcı "bunu hatırla" dediğinde uygulamanın
+hafıza sisteminin bu bilgiyi kaydedebileceğini
+varsay.
 
-KİŞİSELLEŞTİRME:
+Kullanıcı "bunu unut" dediğinde ilgili bilgiyi
+hafızadan çıkarmaya uygun cevap ver.
 
-Sana verilen kullanıcı hafızasını cevaplarını
-kişiselleştirmek için kullan.
+HARİCİ UYGULAMALAR:
 
-Hafızada olmayan bilgileri uydurma.
+Takvim, notlar ve e-posta gibi servisler ileride
+BeyinX'e bağlanabilir.
 
-DUYGUSAL TON:
+Bu servisler gerçekten bağlanmamışsa işlem yapılmış
+gibi davranma.
 
-Kullanıcının mesajının tonuna dikkat et.
+Örneğin takvim bağlantısı yoksa:
 
-Örneğin kullanıcı:
+"Takvim bağlantısı henüz etkin değil."
 
-- heyecanlıysa daha enerjik,
-- üzgün görünüyorsa daha sakin,
-- sinirliyse sakin ve net,
-- normal konuşuyorsa normal
-
-bir ton kullan.
-
-Ancak kullanıcı hakkında psikolojik veya tıbbi
-teşhis yapma.
-
-HAFIZA:
-
-Önceki mesajlardan gelen bilgileri tutarlı şekilde
-kullan.
-
-Fakat emin olmadığın kişisel bilgileri gerçekmiş gibi
-söyleme.
+gibi açıkça belirt.
 
 TEKNİK SORULAR:
 
-Kod, Minecraft, HTML, JavaScript veya benzeri
-teknik konularda mümkün olduğunca doğrudan,
-uygulanabilir ve anlaşılır cevap ver.
+HTML, CSS, JavaScript, Minecraft, kodlama ve teknik
+sorularda doğrudan ve uygulanabilir cevaplar ver.
 
-Kullanıcı "kodu ver" diyorsa gereksiz yere uzun
-açıklamalar yapmadan kodu ver.
+Kullanıcı "kodu ver" diyorsa gereksiz açıklama yerine
+kullanabileceği kodu ver.
+
+DUYGUSAL TON:
+
+Kullanıcının tonuna uyum sağla.
+
+Sinirliyse sakin ve net,
+heyecanlıysa enerjik,
+normal konuşuyorsa doğal konuş.
+
+Hafızadaki bilgiler:
 
 ${memoryText}
 `
@@ -291,134 +331,243 @@ ${memoryText}
     // =========================
 
     const cleanMessages = [
+
       systemMessage,
 
-      ...recentMessages.map((m) => ({
-        role:
-          m.role === "ai"
-            ? "assistant"
-            : "user",
+      ...recentMessages.map(
+        (message) => {
 
-        content:
-          String(m.text || "")
-            .slice(0, 4000)
-      }))
+          const role =
+            message.role === "ai"
+              ? "assistant"
+              : "user";
+
+          // -------------------------
+          // GÖRSELLİ MESAJ
+          // -------------------------
+
+          if (
+            typeof message.image === "string" &&
+            message.image.startsWith(
+              "data:image/"
+            )
+          ) {
+
+            return {
+
+              role,
+
+              content: [
+
+                {
+                  type: "text",
+
+                  text:
+                    String(
+                      message.text || ""
+                    ).slice(0, 4000)
+                },
+
+                {
+                  type: "image_url",
+
+                  image_url: {
+                    url:
+                      message.image
+                  }
+                }
+
+              ]
+
+            };
+          }
+
+          // -------------------------
+          // NORMAL MESAJ
+          // -------------------------
+
+          return {
+
+            role,
+
+            content:
+              String(
+                message.text || ""
+              ).slice(0, 4000)
+
+          };
+
+        }
+      )
+
     ];
 
     // =========================
-    // GROQ API
+    // MODEL
     // =========================
 
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
+    /*
+      Görsel varsa görsel destekli model,
+      normal mesajlarda ana model.
+    */
 
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
+    const model =
+      hasImage
+        ? "meta-llama/llama-4-scout-17b-16e-instruct"
+        : "openai/gpt-oss-120b";
 
-        body: JSON.stringify({
-          model: "openai/gpt-oss-120b",
+    // =========================
+    // GROQ İSTEĞİ
+    // =========================
 
-          messages: cleanMessages,
+    const response =
+      await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
 
-          temperature: 0.6,
+          method: "POST",
 
-          max_completion_tokens: 1000,
+          headers: {
 
-          // Güncel bilgi gerektiğinde
-          // web araması kullanılabilir.
-          tools: [
-            {
-              type: "browser_search"
-            }
-          ]
-        })
-      }
-    );
+            "Content-Type":
+              "application/json",
+
+            "Authorization":
+              `Bearer ${apiKey}`
+
+          },
+
+          body: JSON.stringify({
+
+            model,
+
+            messages:
+              cleanMessages,
+
+            temperature:
+              0.6,
+
+            max_completion_tokens:
+              1200,
+
+            /*
+              Güncel bilgi için web araması.
+            */
+
+            tools: [
+              {
+                type: "browser_search"
+              }
+            ]
+
+          })
+
+        }
+      );
 
     // =========================
     // GROQ CEVABI
     // =========================
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
     // =========================
     // RATE LIMIT
     // =========================
 
-    if (response.status === 429) {
-      const retryAfter =
-        response.headers.get("retry-after");
+    if (
+      response.status === 429
+    ) {
 
-      let waitText = "birkaç saniye";
+      const retryAfter =
+        response.headers.get(
+          "retry-after"
+        );
+
+      let waitText =
+        "birkaç saniye";
 
       if (retryAfter) {
+
         const seconds =
-          Math.ceil(Number(retryAfter));
+          Math.ceil(
+            Number(retryAfter)
+          );
 
         if (
           Number.isFinite(seconds) &&
           seconds > 0
         ) {
+
           waitText =
             `${seconds} saniye`;
         }
       }
 
       return new Response(
+
         JSON.stringify({
+
           error:
             `BeyinX şu anda biraz yoğun 😅\n\n` +
-            `Çok fazla istek geldiği için ` +
-            `kısa süreliğine beklememiz gerekiyor.\n\n` +
+            `Çok fazla istek geldi.\n\n` +
             `Yaklaşık ${waitText} sonra tekrar dene.`
+
         }),
+
         {
+
           status: 429,
 
           headers: {
             "Content-Type":
               "application/json"
           }
+
         }
+
       );
     }
 
     // =========================
-    // DİĞER API HATALARI
+    // API HATASI
     // =========================
 
     if (!response.ok) {
-      const apiError =
-        data?.error?.message || "";
 
       console.error(
         "Groq API:",
-        apiError
+        data?.error
       );
 
       return new Response(
+
         JSON.stringify({
+
           error:
             "BeyinX bağlantısında geçici bir sorun oluştu. " +
             "Biraz sonra tekrar dene. 🤖"
+
         }),
+
         {
-          status: response.status,
+
+          status:
+            response.status,
 
           headers: {
             "Content-Type":
               "application/json"
           }
+
         }
+
       );
     }
 
     // =========================
-    // CEVAP
+    // MESAJ
     // =========================
 
     const message =
@@ -427,21 +576,33 @@ ${memoryText}
     const answer =
       message?.content || "";
 
+    // =========================
+    // BOŞ CEVAP
+    // =========================
+
     if (!answer.trim()) {
+
       return new Response(
+
         JSON.stringify({
+
           error:
             "BeyinX şu anda cevap oluşturamadı. " +
             "Tekrar deneyebilirsin."
+
         }),
+
         {
+
           status: 500,
 
           headers: {
             "Content-Type":
               "application/json"
           }
+
         }
+
       );
     }
 
@@ -452,50 +613,84 @@ ${memoryText}
     const webUsed =
       Array.isArray(
         message?.executed_tools
-      );
+      ) &&
+      message.executed_tools.length > 0;
 
     // =========================
-    // BAŞARILI
+    // GÖRSEL KULLANILDI MI?
+    // =========================
+
+    const visionUsed =
+      hasImage;
+
+    // =========================
+    // CEVAP
     // =========================
 
     return new Response(
+
       JSON.stringify({
+
         output_text:
           answer.trim(),
 
         web_used:
-          webUsed
+          webUsed,
+
+        vision_used:
+          visionUsed,
+
+        memory_used:
+          Boolean(
+            memory.name ||
+            memory.long_memory?.length ||
+            memory.preferences?.length
+          )
+
       }),
+
       {
+
         status: 200,
 
         headers: {
           "Content-Type":
             "application/json"
         }
+
       }
+
     );
 
   } catch (error) {
+
     console.error(
       "BeyinX backend error:",
       error
     );
 
     return new Response(
+
       JSON.stringify({
+
         error:
           "BeyinX bağlantısında beklenmeyen bir sorun oluştu. " +
           "Biraz sonra tekrar dene. 😅"
+
       }),
+
       {
+
         status: 500,
 
         headers: {
           "Content-Type":
             "application/json"
         }
+
       }
+
     );
+
   }
 };
