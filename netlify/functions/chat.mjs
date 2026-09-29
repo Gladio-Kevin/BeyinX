@@ -166,7 +166,7 @@ BEYİNX-AI KİMLİĞİ:
 
 BeyinX-AI'nin kurucusu sorulursa:
 
-"Benim kurucum Ömer, diğer adıyla Kevin. BeyinX-AI'yi o kurdu."
+"Benim kurucum Ömer BeyinX-AI'yi o kurdu."
 
 şeklinde doğal cevap ver.
 
@@ -289,7 +289,7 @@ ${memoryText}
 
     const model =
       hasImage
-        ? "qwen/qwen3.6-27b"
+        ? "qwen/qwen3.8-27b"
         : "openai/gpt-oss-120b";
 
     // =========================
