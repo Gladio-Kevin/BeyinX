@@ -7,6 +7,10 @@
 <meta name="description" content="BeyinX - Yapay zeka sohbet uygulaması">
 <link rel="manifest" href="/manifest.webmanifest">
 <title>BeyinX</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
 
 <style>
 *{
@@ -690,6 +694,14 @@ font-size:13px;
 }
 
 }
+.bubble .bx-rich{white-space:normal;overflow-wrap:anywhere;line-height:1.55}
+.bx-rich p{margin:0 0 9px}.bx-rich p:last-child{margin-bottom:0}
+.bx-rich h1,.bx-rich h2,.bx-rich h3{font-size:1.07em;margin:12px 0 7px}
+.bx-rich ul,.bx-rich ol{padding-left:22px;margin:6px 0 10px}
+.bx-rich li{margin:3px 0}.bx-rich pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:10px;background:#eeeefa;border-radius:9px;margin:8px 0}
+.bx-rich code{overflow-wrap:anywhere}.bx-rich blockquote{border-left:3px solid #8585d6;padding-left:10px;margin:8px 0}
+.bx-rich .katex-display{overflow-x:auto;overflow-y:hidden}
+.bx-continue{display:block;margin-top:12px;padding:8px 12px;border:1px solid #d8d7f8;border-radius:10px;background:#f2f1ff;color:#5b50d5;font-size:12px;cursor:pointer}
 </style>
 </head>
 
@@ -710,7 +722,7 @@ BeyinX
 </div>
 
 <div class="nameDesc">
-BeyinX seni bu isimle tanıyacak.
+İsmini ne yazarsan BeyinX sana ona göre hitap eder.
 </div>
 
 <input
@@ -1052,6 +1064,68 @@ let selectedMessageIndex = null;
 let deferredInstallPrompt = null;
 
 
+/* GÜVENLİ İSİM DENETİMİ */
+function validBeyinXName(value){
+ const name=String(value||"").trim();
+ if(!name || name.length>20 || !/^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]{1,20}$/u.test(name)) return false;
+ const n=name.toLocaleLowerCase("tr-TR").replace(/\s+/g,"").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ü/g,"u").replace(/ğ/g,"g").replace(/ş/g,"s").replace(/ç/g,"c");
+ return !["amk","orospu","siktir","sik","yarrak","yarak","pic","got","bok","fuck","bitch","amcik","pezevenk","ibne","salak","aptal","gerizekali","gavat"].some(x=>n.includes(x));
+}
+if(username && !validBeyinXName(username)){
+ username=null;
+ localStorage.removeItem("beyinx_username");
+}
+
+/* AI METNİNİ GÜVENLİ VE BİÇİMLİ GÖSTER */
+function formatBeyinX(text){
+ const root=document.createElement("div");root.className="bx-rich";
+ const raw=String(text||"");
+ if(!window.marked || !window.DOMPurify){root.textContent=raw;root.style.whiteSpace="pre-wrap";return root;}
+ const formulas=[];
+ const protectedText=raw.replace(/\$\$([\s\S]*?)\$\$|\$([^$\n]+?)\$/g,(all,block,inline)=>{
+  const i=formulas.length;formulas.push({formula:block??inline,display:block!==undefined});
+  return `BXFORMULA${i}END`;
+ });
+ let html=window.marked.parse(protectedText,{breaks:true,gfm:true});
+ html=window.DOMPurify.sanitize(html,{USE_PROFILES:{html:true}});
+ root.innerHTML=html;
+ const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+ const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+ for(const node of nodes){
+  const pieces=node.textContent.split(/(BXFORMULA\d+END)/g);
+  if(pieces.length===1)continue;
+  const fragment=document.createDocumentFragment();
+  for(const piece of pieces){
+   const match=/^BXFORMULA(\d+)END$/.exec(piece);
+   if(!match){fragment.appendChild(document.createTextNode(piece));continue;}
+   const f=formulas[Number(match[1])];const span=document.createElement("span");
+   if(f && window.katex){try{window.katex.render(f.formula,span,{throwOnError:false,displayMode:f.display,trust:false});}catch{span.textContent=f.formula;}}
+   else span.textContent=f?f.formula:piece;
+   fragment.appendChild(span);
+  }
+  node.replaceWith(fragment);
+ }
+ return root;
+}
+
+let beyinXContinuing=false;
+async function continueBeyinX(index,button){
+ if(beyinXContinuing || !currentChat || currentChat.messages[index]?.role!=="ai")return;
+ beyinXContinuing=true;button.disabled=true;button.textContent="Devamı hazırlanıyor...";
+ try{
+  const previous=currentChat.messages[index].text;
+  const data=await callAI({continueIndex:index});
+  const extra=String(data?.output_text||"").trim();
+  if(!extra)throw new Error("Devam cevabı boş geldi.");
+  const normalized=extra.replace(/^\s*(?:devam(?:ı)?|kaldığım yerden)[:：]?\s*/i,"").trim();
+  if(!normalized || previous.endsWith(normalized))throw new Error("Yeni cevap üretilmedi.");
+  currentChat.messages[index].text=previous+"\n\n"+normalized;
+  currentChat.messages[index].truncated=Boolean(data?.truncated);
+  saveChats();renderCurrentChat();setStatus("Hazır");
+ }catch(e){button.disabled=false;button.textContent="↪ Devam et";showToast(localizeError(e));}
+ finally{beyinXContinuing=false;}
+}
+
 /* AÇILIŞ */
 
 if(username){
@@ -1081,16 +1155,8 @@ document
 .value
 .trim();
 
-if(!name){alert("İsmini yaz.");return;}
-if(name.length>20){alert("İsim en fazla 20 karakter olabilir.");return;}
-if(!/^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]{1,20}$/u.test(name)){
- alert("İsimde sadece harf ve boşluk kullanabilirsin.");return;
-}
-const normalized=name.toLocaleLowerCase("tr-TR").replace(/\s+/g,"")
- .replace(/[ıi1!|]/g,"i").replace(/[0o]/g,"o").replace(/[3e]/g,"e").replace(/[4a@]/g,"a");
-const blocked=["amk","aq","orospu","siktir","sik","yarrak","yarak","piç","pic","göt","got","bok","fuck","bitch","amcik","amcık","pezevenk","ibne","salak","aptal","gerizekali","gerizekalı"];
-if(blocked.some(word=>normalized.includes(word))){
- alert("Bu isim kullanılamaz. Lütfen uygun bir isim seç.");return;
+if(!validBeyinXName(name)){
+ alert("İsim 1-20 harf olmalı; uygunsuz kelime ve sembol içeremez.");return;
 }
 username=name;
 
@@ -1248,20 +1314,15 @@ bubble.appendChild(img);
 }
 
 const textPart=document.createElement("div");
-textPart.textContent =
-String(text || "").trim();
+if(type==="ai")textPart.appendChild(formatBeyinX(String(text||"").trim()));
+else textPart.textContent=String(text||"").trim();
 bubble.appendChild(textPart);
-if(type==="ai" && String(text||"").length>150){
+if(type==="ai" && messageIndex!==null && currentChat?.messages?.[messageIndex] &&
+  (currentChat.messages[messageIndex].truncated || /devam et/i.test(String(text||"").slice(-120)))){
  const continueBtn=document.createElement("button");
- continueBtn.type="button";
+ continueBtn.type="button";continueBtn.className="bx-continue";
  continueBtn.textContent="↪ Devam et";
- continueBtn.style.cssText="display:block;margin-top:12px;padding:7px 11px;border:1px solid #d8d7f8;border-radius:10px;background:#f2f1ff;color:#5b50d5;font-size:12px;cursor:pointer";
- continueBtn.onclick=()=>{
-   const inp=document.getElementById("messageInput");
-   if(!inp)return;
-   inp.value="Kaldığın yerden devam et. Önceki cevapta çözülemeyen soruları sırayla tamamla; aynı şeyleri tekrar etme.";
-   sendMessage();
- };
+ continueBtn.onclick=()=>continueBeyinX(messageIndex,continueBtn);
  bubble.appendChild(continueBtn);
 }
 content.appendChild(bubble);
@@ -1677,14 +1738,21 @@ loadHistory();
 
 /* AI ÇAĞRISI */
 
-async function callAI(){
+async function callAI(options={}){
 
 if(!currentChat){
 throw new Error("Chat bulunamadı.");
 }
 
-const recentMessages =
-currentChat.messages.slice(-14);
+let recentMessages=currentChat.messages.slice(-10);
+if(Number.isInteger(options.continueIndex)){
+ const idx=options.continueIndex;
+ const previous=currentChat.messages[idx];
+ const earlier=currentChat.messages.slice(Math.max(0,idx-7),idx);
+ recentMessages=[...earlier,previous,{
+ role:"user",text:"Önceki cevabın kaldığı yerden devam et. Daha önce yazdıklarını tekrarlama. Geriye kalan tüm soruları mümkünse bu tek cevapta bitir. Görselde okunmayan soruları uydurma. Gereksiz uzun anlatma."
+ }];
+}
 
 setStatus("Düşünüyor...",true);
 
@@ -1728,7 +1796,8 @@ headers:{
 },
 body:JSON.stringify({
 messages:recentMessages,
-memory:memory
+memory:memory,
+continuation:Number.isInteger(options.continueIndex)
 })
 }
 );
@@ -1847,7 +1916,8 @@ thinkingBubble.textContent=answer;
 
 currentChat.messages.push({
 role:"ai",
-text:answer
+text:answer,
+truncated:Boolean(data?.truncated)
 });
 
 saveChats();
