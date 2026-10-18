@@ -4,15 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#6366f1">
-<meta name="description" content="BeyinX, Türkçe yapay zekâ sohbet uygulamasıdır. Sorular sor, kod yazımı ve fikir geliştirme konusunda yardım al, görseller hakkında konuş ve sohbetlerini sakla.">
-<link rel="canonical" href="https://beyinx-ai.netlify.app/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="BeyinX">
-<meta property="og:title" content="BeyinX - Türkçe Yapay Zekâ Sohbet">
-<meta property="og:description" content="BeyinX ile Türkçe sohbet et, sorular sor, kod ve fikirler için yapay zekâ desteği al.">
-<meta property="og:url" content="https://beyinx-ai.netlify.app/">
+<meta name="description" content="BeyinX - Yapay zeka sohbet uygulaması">
 <link rel="manifest" href="/manifest.webmanifest">
-<title>BeyinX - Türkçe Yapay Zekâ Sohbet</title>
+<title>BeyinX</title>
 
 <style>
 *{
@@ -707,19 +701,21 @@ font-size:13px;
 
 <div class="nameBrain">🧠</div>
 
-<h1 class="nameLogo">BeyinX</h1>
+<div class="nameLogo">
+BeyinX
+</div>
 
 <div class="nameTitle">
 İsim koy
 </div>
 
 <div class="nameDesc">
-BeyinX seni bu isimle tanıyacak. Türkçe yapay zekâ ile sohbet edebilir, sorular sorabilir, kod ve fikir geliştirme konusunda yardım alabilirsin.
+BeyinX seni bu isimle tanıyacak.
 </div>
 
 <input
 id="nameInput"
-maxlength="30"
+maxlength="20"
 placeholder="İsmini yaz..."
 onkeydown="nameEnter(event)"
 >
@@ -1085,14 +1081,17 @@ document
 .value
 .trim();
 
-if(!name){
-
-alert("İsmini yaz.");
-
-return;
-
+if(!name){alert("İsmini yaz.");return;}
+if(name.length>20){alert("İsim en fazla 20 karakter olabilir.");return;}
+if(!/^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]{1,20}$/u.test(name)){
+ alert("İsimde sadece harf ve boşluk kullanabilirsin.");return;
 }
-
+const normalized=name.toLocaleLowerCase("tr-TR").replace(/\s+/g,"")
+ .replace(/[ıi1!|]/g,"i").replace(/[0o]/g,"o").replace(/[3e]/g,"e").replace(/[4a@]/g,"a");
+const blocked=["amk","aq","orospu","siktir","sik","yarrak","yarak","piç","pic","göt","got","bok","fuck","bitch","amcik","amcık","pezevenk","ibne","salak","aptal","gerizekali","gerizekalı"];
+if(blocked.some(word=>normalized.includes(word))){
+ alert("Bu isim kullanılamaz. Lütfen uygun bir isim seç.");return;
+}
 username=name;
 
 localStorage.setItem(
@@ -1252,7 +1251,19 @@ const textPart=document.createElement("div");
 textPart.textContent =
 String(text || "").trim();
 bubble.appendChild(textPart);
-
+if(type==="ai" && String(text||"").length>150){
+ const continueBtn=document.createElement("button");
+ continueBtn.type="button";
+ continueBtn.textContent="↪ Devam et";
+ continueBtn.style.cssText="display:block;margin-top:12px;padding:7px 11px;border:1px solid #d8d7f8;border-radius:10px;background:#f2f1ff;color:#5b50d5;font-size:12px;cursor:pointer";
+ continueBtn.onclick=()=>{
+   const inp=document.getElementById("messageInput");
+   if(!inp)return;
+   inp.value="Kaldığın yerden devam et. Önceki cevapta çözülemeyen soruları sırayla tamamla; aynı şeyleri tekrar etme.";
+   sendMessage();
+ };
+ bubble.appendChild(continueBtn);
+}
 content.appendChild(bubble);
 
 const options =
