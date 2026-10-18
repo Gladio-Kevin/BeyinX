@@ -1,500 +1,236 @@
+
 export default async (req) => {
+  const json = (data, status = 200) =>
+    new Response(JSON.stringify(data), {
+      status,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8"
+      }
+    });
+
   try {
-
-    // =========================
-    // SADECE POST
-    // =========================
-
     if (req.method !== "POST") {
-      return new Response(
-        JSON.stringify({
-          error: "Sadece POST isteği kullanılabilir."
-        }),
-        {
-          status: 405,
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      );
+      return json({ error: "Sadece POST isteği kullanılabilir." }, 405);
     }
-
-    // =========================
-    // VERİLER
-    // =========================
 
     const body = await req.json();
+    const messages = Array.isArray(body.messages) ? body.messages : [];
+    const memory = body.memory && typeof body.memory === "object"
+      ? body.memory
+      : {};
 
-    const messages = Array.isArray(body.messages)
-      ? body.messages
-      : [];
-
-    const memory =
-      body.memory &&
-      typeof body.memory === "object"
-        ? body.memory
-        : {};
-
-    if (messages.length === 0) {
-      return new Response(
-        JSON.stringify({
-          error: "Gönderilecek mesaj bulunamadı."
-        }),
-        {
-          status: 400,
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      );
+    if (!messages.length) {
+      return json({ error: "Gönderilecek mesaj bulunamadı." }, 400);
     }
 
-    // =========================
-    // API KEY
-    // =========================
-
-    const apiKey =
-      process.env.GROQ_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-      return new Response(
-        JSON.stringify({
-          error:
-            "BeyinX AI bağlantısı yapılandırılmamış."
-        }),
-        {
-          status: 500,
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      );
+      return json({
+        error: "BeyinX AI bağlantısı yapılandırılmamış."
+      }, 500);
     }
 
-    // =========================
-    // SON MESAJLAR
-    // =========================
+    const recentMessages = messages.slice(-12);
 
-    const recentMessages =
-      messages.slice(-10);
+    const hasImage = recentMessages.some(
+      m => m?.role === "user" &&
+      typeof m.image === "string" &&
+      m.image.startsWith("data:image/")
+    );
 
-    // =========================
-    // GÖRSEL KONTROLÜ
-    // =========================
+    const memoryText = [
+      memory.name
+        ? "Kullanıcının adı: " + String(memory.name).slice(0, 20)
+        : "",
+      Array.isArray(memory.preferences)
+        ? "Tercihler: " + memory.preferences.slice(0, 10)
+            .map(x => String(x).slice(0, 150)).join(", ")
+        : "",
+      Array.isArray(memory.long_memory)
+        ? "Hatırlanan bilgiler: " + memory.long_memory.slice(0, 30)
+            .map(x => String(x).slice(0, 200)).join("; ")
+        : "",
+      "Dil: " + String(memory.language || "tr").slice(0, 30)
+    ].filter(Boolean).join("\n");
 
-    const hasImage =
-      recentMessages.some(
-        (m) =>
-          typeof m?.image === "string" &&
-          m.image.startsWith("data:image/")
-      );
-
-    // =========================
-    // HAFIZA
-    // =========================
-
-    let memoryText = "";
-
-    if (memory.name) {
-      memoryText +=
-        `Kullanıcının adı: ${String(
-          memory.name
-        ).slice(0, 50)}\n`;
-    }
-
-    if (
-      Array.isArray(
-        memory.preferences
-      )
-    ) {
-      const preferences =
-        memory.preferences
-          .slice(0, 10)
-          .map(
-            (x) =>
-              String(x).slice(0, 150)
-          )
-          .join(", ");
-
-      if (preferences) {
-        memoryText +=
-          `Kullanıcı tercihleri: ${preferences}\n`;
-      }
-    }
-
-    if (memory.language) {
-      memoryText +=
-        `Tercih edilen dil: ${String(
-          memory.language
-        ).slice(0, 30)}\n`;
-    }
-
-    // =========================
-    // TARİH
-    // =========================
-
-    const currentDate =
-      new Date()
-        .toISOString()
-        .slice(0, 10);
-
-    // =========================
-    // SİSTEM MESAJI
-    // =========================
+    const today = new Date().toISOString().slice(0, 10);
 
     const systemMessage = {
       role: "system",
-
       content: `
-Sen BeyinX-AI adlı Türkçe yapay zeka asistanısın.
+Sen BeyinX adlı Türkçe yapay zekâ asistanısın.
+Bugünün tarihi: ${today}.
 
-Bugünün tarihi: ${currentDate}
+GENEL KURALLAR:
+- Doğal, samimi ve anlaşılır konuş.
+- Kullanıcı kısa sorarsa kısa, ayrıntı isterse ayrıntılı cevap ver.
+- Gereksiz girişleri ve tekrarları azalt.
+- Kullanıcının diline uyum sağla.
+- Emin olmadığın bilgileri kesinmiş gibi sunma.
+- Güncel bilgiye erişimin yoksa bunu açıkça söyle.
+- BeyinX'in kurucusu sorulursa Ömer olduğunu söyle.
+- Kullanıcının hafızasındaki bilgileri gerektiğinde kullan.
+- Hafızada olmayan kişisel bilgileri uydurma.
 
-Kullanıcıyla doğal, samimi ve anlaşılır konuş.
-
-GENEL DAVRANIŞ:
-
-- Kullanıcı kısa sorarsa kısa cevap ver.
-- Detay isterse detaylı cevap ver.
-- Gereksiz robotik cevaplar verme.
-- Kullanıcının konuşma tarzına uyum sağla.
-- Türkçe konuşuluyorsa Türkçe cevap ver.
-- Kullanıcı başka dile geçerse o dile uyum sağla.
-- Gerektiğinde az miktarda emoji kullan.
-
-BEYİNX-AI KİMLİĞİ:
-
-BeyinX-AI'nin kurucusu sorulursa:
-
-"Benim kurucum Ömer BeyinX-AI'yi o kurdu."
-
-şeklinde doğal cevap ver.
-
-HAFIZA:
-
-Sana verilen kullanıcı hafızasını kullan.
-
-Hafızada bulunan bilgileri sonraki konuşmalarda
-tutarlı şekilde hatırla.
-
-Hafızada olmayan kişisel bilgileri uydurma.
-
-Örneğin kullanıcı daha önce Minecraft
-oynadığını söylediyse ve bu bilgi hafızada
-bulunuyorsa sonraki sohbetlerde tekrar
-"Hangi oyun?" diye sorma.
+ÖDEV VE MATEMATİK:
+- Kullanıcı ödev çözmeni isterse soruları sırayla çöz.
+- Önce soruyu doğru okuduğundan emin ol.
+- Görsel bulanıksa rakam veya işlem uydurma.
+- Okunamayan bölümü açıkça belirt.
+- Okuyabildiğin soruları çözmeye devam et.
+- Çözümleri öğrencinin anlayabileceği sade Türkçeyle yaz.
+- Her soru için önce kısa işlem, ardından net sonuç ver.
+- Gereksiz uzun açıklamalardan kaçın.
+- Soruların tamamını mümkün olduğunca yanıtla.
+- Cevap uzunsa mantıklı bir yerde dur ve
+  "Devamı için Devam et yaz." de.
+- Cevabı bir cümlenin veya işlemin ortasında kesme.
+- Matematik ifadelerini mümkün olduğunca
+  okunabilir düz metinle göster.
+- Örneğin karekök için √, çarpma için × kullan.
+- Gereksiz LaTeX komutları kullanma.
+- Kesirleri gerektiğinde (a/b) biçiminde yaz.
+- Matematik işlemlerinin doğruluğunu kontrol et.
 
 GÖRSEL ANALİZ:
+- Gönderilen fotoğrafı dikkatlice incele.
+- Görselde gerçekten bulunan içerikten söz et.
+- Fotoğrafı görmediysen gördüğünü iddia etme.
+- Görselde olmayan sorular, sayılar veya metinler üretme.
+- Sorular çoksa numara sırasını koru.
+- Belirsiz karakterleri tahmin etmek yerine belirt.
+- Kullanıcıdan aynı görseli gereksiz yere yeniden isteme.
 
-Kullanıcı görsel gönderirse görseli gerçekten
-incele ve gördüklerini açıklamaya çalış.
+KOD VE TEKNİK:
+- HTML, JavaScript ve Minecraft gibi konularda
+  uygulanabilir çözümler üret.
+- Kullanıcı tam kod isterse eksik parça bırakma.
+- Mevcut özellikleri korumak önemliyse bunu gözet.
 
-Görselde:
-- Minecraft ekranları
-- oyunlar
-- yazılar
-- nesneler
-- arayüzler
-- ekran görüntüleri
-- grafikler
-
-varsa bunları analiz edebilirsin.
-
-Görseli göremiyorsan uydurma.
-
-Görsel gönderildiğinde gereksiz yere
-"fotoğrafı buraya yükle" deme.
-
-TEKNİK SORULAR:
-
-HTML, JavaScript, Minecraft ve benzeri
-teknik konularda doğrudan ve uygulanabilir
-cevaplar ver.
-
-Kullanıcı "kodu ver" derse mümkün olduğunca
-doğrudan kodu ver.
-
-Kullanıcının hafızası:
-
+KULLANICI HAFIZASI:
 ${memoryText}
 `
     };
 
-    // =========================
-    // MESAJLARI GROQ FORMATINA ÇEVİR
-    // =========================
-
     const cleanMessages = [
       systemMessage,
+      ...recentMessages.map(m => {
+        const role = m.role === "ai" || m.role === "assistant"
+          ? "assistant"
+          : "user";
 
-      ...recentMessages.map((m) => {
+        const text = String(m.text || "").slice(0, 5000);
 
-        const role =
-          m.role === "ai"
-            ? "assistant"
-            : "user";
-
-        const text =
-          String(
-            m.text || ""
-          ).slice(0, 4000);
-
-        const image =
+        const image = role === "user" &&
           typeof m.image === "string" &&
-          m.image.startsWith("data:image/")
+          /^data:image\/(?:jpeg|jpg|png|webp);base64,/i.test(m.image) &&
+          m.image.length <= 2500000
             ? m.image
             : null;
 
-        // Görsel varsa:
-        if (
-          image &&
-          role === "user"
-        ) {
+        if (image) {
           return {
             role: "user",
-
             content: [
               {
                 type: "text",
-
-                text:
-                  text ||
-                  "Bu görseli analiz et."
+                text: text || "Bu görseli dikkatlice analiz et."
               },
-
               {
                 type: "image_url",
-
-                image_url: {
-                  url: image
-                }
+                image_url: { url: image }
               }
             ]
           };
         }
 
-        // Normal mesaj
-        return {
-          role,
-
-          content: text
-        };
-
+        return { role, content: text };
       })
     ];
 
-    // =========================
-    // MODEL
-    // =========================
-
-    const model =
-      hasImage
-        ? "qwen/qwen3.8-27b"
-        : "openai/gpt-oss-120b";
-
-    // =========================
-    // İSTEK
-    // =========================
+    const model = hasImage
+      ? "qwen/qwen3.8-27b"
+      : "openai/gpt-oss-120b";
 
     const requestBody = {
       model,
-
-      messages:
-        cleanMessages,
-
-      temperature: 0.6,
-
-      max_completion_tokens: 1000
+      messages: cleanMessages,
+      temperature: 0.3,
+      max_completion_tokens: 3500
     };
 
-    // =========================
-    // GROQ
-    // =========================
-
-    const response =
-      await fetch(
-        "https://api.groq.com/openai/v1/chat/completions",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            "Authorization":
-              `Bearer ${apiKey}`
-          },
-
-          body:
-            JSON.stringify(
-              requestBody
-            )
-        }
-      );
-
-    const data =
-      await response.json();
-
-    // =========================
-    // RATE LIMIT
-    // =========================
-
-    if (
-      response.status === 429
-    ) {
-
-      const retryAfter =
-        response.headers.get(
-          "retry-after"
-        );
-
-      let waitText =
-        "birkaç saniye";
-
-      if (retryAfter) {
-
-        const seconds =
-          Math.ceil(
-            Number(retryAfter)
-          );
-
-        if (
-          Number.isFinite(
-            seconds
-          ) &&
-          seconds > 0
-        ) {
-          waitText =
-            `${seconds} saniye`;
-        }
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(requestBody)
       }
+    );
 
-      return new Response(
-        JSON.stringify({
-          error:
-            `BeyinX şu anda biraz yoğun 😅\n\n` +
-            `Çok fazla istek geldiği için ` +
-            `kısa süreliğine beklememiz gerekiyor.\n\n` +
-            `Yaklaşık ${waitText} sonra tekrar dene.`
-        }),
-        {
-          status: 429,
+    let data;
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
+    try {
+      data = await response.json();
+    } catch {
+      return json({
+        error: "Sunucudan geçersiz cevap geldi."
+      }, 502);
     }
 
-    // =========================
-    // API HATASI
-    // =========================
+    if (response.status === 429) {
+      const retryAfter = Number(
+        response.headers.get("retry-after")
+      );
+
+      const wait = Number.isFinite(retryAfter) && retryAfter > 0
+        ? `${Math.ceil(retryAfter)} saniye`
+        : "biraz";
+
+      return json({
+        error: `BeyinX şu anda yoğun. ${wait} bekleyip tekrar dene.`
+      }, 429);
+    }
 
     if (!response.ok) {
+      console.error("Groq API hatası:", data?.error);
 
-      const apiError =
-        data?.error?.message || "";
-
-      console.error(
-        "Groq API:",
-        apiError
-      );
-
-      return new Response(
-        JSON.stringify({
-          error:
-            apiError ||
-            "BeyinX bağlantısında geçici bir sorun oluştu."
-        }),
-        {
-          status:
-            response.status,
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
+      return json({
+        error: data?.error?.message ||
+          "BeyinX bağlantısında geçici bir sorun oluştu."
+      }, response.status);
     }
 
-    // =========================
-    // CEVAP
-    // =========================
+    const choice = data?.choices?.[0];
+    const answer = String(choice?.message?.content || "").trim();
 
-    const message =
-      data?.choices?.[0]?.message;
-
-    const answer =
-      message?.content || "";
-
-    if (!answer.trim()) {
-
-      return new Response(
-        JSON.stringify({
-          error:
-            "BeyinX şu anda cevap oluşturamadı. Tekrar deneyebilirsin."
-        }),
-        {
-          status: 500,
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          }
-        }
-      );
+    if (!answer) {
+      return json({
+        error: "BeyinX cevap oluşturamadı. Tekrar dene."
+      }, 502);
     }
 
-    // =========================
-    // BAŞARILI
-    // =========================
+    const truncated = choice?.finish_reason === "length";
 
-    return new Response(
-      JSON.stringify({
-
-        output_text:
-          answer.trim(),
-
-        web_used:
-          false,
-
-        image_used:
-          hasImage
-
-      }),
-      {
-        status: 200,
-
-        headers: {
-          "Content-Type":
-            "application/json"
-        }
-      }
-    );
+    return json({
+      output_text: answer +
+        (truncated
+          ? "\n\nYanıt sınırına ulaşıldı. Devam et yazarak sürdürebilirsin."
+          : ""),
+      web_used: false,
+      image_used: hasImage,
+      truncated
+    });
 
   } catch (error) {
+    console.error("BeyinX backend error:", error);
 
-    console.error(
-      "BeyinX backend error:",
-      error
-    );
-
-    return new Response(
-      JSON.stringify({
-        error:
-          "BeyinX bağlantısında beklenmeyen bir sorun oluştu. Biraz sonra tekrar dene. 😅"
-      }),
-      {
-        status: 500,
-
-        headers: {
-          "Content-Type":
-            "application/json"
-        }
-      }
-    );
+    return json({
+      error: "BeyinX bağlantısında beklenmeyen bir sorun oluştu. Biraz sonra tekrar dene."
+    }, 500);
   }
 };
