@@ -1738,6 +1738,22 @@ loadHistory();
 
 /* AI ÇAĞRISI */
 
+// Tek sekmede tek istek; farklı sekmelerde 5 saniyelik ortak bekleme.
+let bxRequestBusy=false;
+const BX_GAP_MS=5000;
+const BX_NEXT_KEY="beyinx_next_request_at";
+function bxWait(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+async function bxAcquireRequest(){
+ if(bxRequestBusy)throw new Error("BeyinX zaten bir cevap hazırlıyor. Lütfen bekle.");
+ bxRequestBusy=true;
+ try{
+  const next=Number(localStorage.getItem(BX_NEXT_KEY)||0);
+  const delay=Math.max(0,Math.min(120000,next-Date.now()));
+  if(delay){setStatus(`Bekleniyor: ${Math.ceil(delay/1000)} sn`,true);await bxWait(delay);}
+  // Zaman damgası, istekten ÖNCE kaydedilir.
+  localStorage.setItem(BX_NEXT_KEY,String(Date.now()+BX_GAP_MS));
+ }catch(e){bxRequestBusy=false;throw e;}
+}
 async function callAI(options={}){
 
 if(!currentChat){
@@ -1786,7 +1802,10 @@ long_memory:longMemory.slice(0,30),
 language:localStorage.getItem("beyinx_language") || "tr"
 };
 
-const response =
+await bxAcquireRequest();
+let response;
+try{
+response =
 await fetch(
 "/.netlify/functions/chat",
 {
@@ -1797,7 +1816,8 @@ headers:{
 body:JSON.stringify({
 messages:recentMessages,
 memory:memory,
-continuation:Number.isInteger(options.continueIndex)
+continuation:Number.isInteger(options.continueIndex),
+use_backup:options.useBackup===true
 })
 }
 );
@@ -1810,13 +1830,24 @@ data=await response.json();
 throw new Error("Sunucudan geçersiz cevap geldi.");
 }
 
+if(response.status===429){
+ const seconds=Number(data?.retry_after);
+ if(Number.isFinite(seconds)&&seconds>0){
+  const next=Date.now()+Math.min(seconds*1000,86400000);
+  localStorage.setItem(BX_NEXT_KEY,String(next));
+ }
+}
 if(!response.ok){
-throw new Error(
-data?.error || "BeyinX bağlantı hatası."
-);
+const err=new Error(data?.error || "BeyinX bağlantı hatası.");
+err.fallbackAvailable=Boolean(data?.fallback_available);
+err.httpStatus=response.status;
+throw err;
 }
 
 return data;
+}finally{
+ bxRequestBusy=false;
+}
 }
 
 
@@ -1927,9 +1958,30 @@ setStatus("Hazır");
 
 }catch(error){
 
-thinkingBubble.textContent =
-localizeError(error);
-
+thinkingBubble.textContent=localizeError(error);
+if(error.fallbackAvailable){
+ const backupBtn=document.createElement("button");
+ backupBtn.type="button";
+ backupBtn.className="bx-continue";
+ backupBtn.textContent="🧠 Yedek yapay zekâyı dene";
+ backupBtn.onclick=async()=>{
+  if(backupBtn.disabled)return;
+  backupBtn.disabled=true;
+  backupBtn.textContent="Yedek model deneniyor...";
+  try{
+   const data=await callAI({useBackup:true});
+   const answer=String(data?.output_text||"").trim();
+   if(!answer)throw new Error("Yedek model boş cevap verdi.");
+   currentChat.messages.push({role:"ai",text:answer,truncated:Boolean(data?.truncated)});
+   saveChats();renderCurrentChat();setStatus("Hazır");
+  }catch(backupError){
+   backupBtn.disabled=false;
+   backupBtn.textContent="🧠 Yedek yapay zekâyı dene";
+   showToast(localizeError(backupError));
+  }
+ };
+ thinkingBubble.parentNode.appendChild(backupBtn);
+}
 setStatus("Hazır");
 
 }
