@@ -1,27 +1,106 @@
 
 export default async (req) => {
-  const json = (data, status = 200) =>
-    new Response(JSON.stringify(data), {
+
+  // =========================
+  // YARDIMCI FONKSİYONLAR
+  // =========================
+
+  const json = (data, status = 200) => {
+    return new Response(JSON.stringify(data), {
       status,
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store"
       }
     });
+  };
+
+  const validImage = (image) => {
+    return (
+      typeof image === "string" &&
+      /^data:image\/(?:jpeg|png|webp);base64,/i.test(image) &&
+      image.length <= 2600000
+    );
+  };
+
+  const safeName = (value) => {
+    const name = String(value || "").trim();
+
+    if (
+      !name ||
+      name.length > 20 ||
+      !/^[a-zA-ZçÇğĞıİöÖşŞüÜ ]+$/u.test(name)
+    ) {
+      return "";
+    }
+
+    const normalized = name
+      .toLocaleLowerCase("tr-TR")
+      .replace(/\s+/g, "")
+      .replace(/ı/g, "i")
+      .replace(/ğ/g, "g")
+      .replace(/ü/g, "u")
+      .replace(/ş/g, "s")
+      .replace(/ö/g, "o")
+      .replace(/ç/g, "c");
+
+    const blocked = [
+      "amk",
+      "orospu",
+      "siktir",
+      "sik",
+      "yarrak",
+      "yarak",
+      "pic",
+      "got",
+      "bok",
+      "fuck",
+      "bitch",
+      "amcik",
+      "pezevenk",
+      "ibne",
+      "salak",
+      "aptal",
+      "gerizekali",
+      "gavat"
+    ];
+
+    return blocked.some(word => normalized.includes(word))
+      ? ""
+      : name;
+  };
 
   try {
+
+    // =========================
+    // SADECE POST
+    // =========================
+
     if (req.method !== "POST") {
-      return json({ error: "Sadece POST isteği kullanılabilir." }, 405);
+      return json({
+        error: "Sadece POST isteği kullanılabilir."
+      }, 405);
     }
 
-    const body = await req.json();
-    const messages = Array.isArray(body.messages) ? body.messages : [];
-    const memory = body.memory && typeof body.memory === "object"
-      ? body.memory
-      : {};
+    // =========================
+    // GELEN VERİLER
+    // =========================
 
-    if (!messages.length) {
-      return json({ error: "Gönderilecek mesaj bulunamadı." }, 400);
+    const body = await req.json().catch(() => null);
+
+    if (
+      !body ||
+      !Array.isArray(body.messages) ||
+      body.messages.length === 0
+    ) {
+      return json({
+        error: "Gönderilecek mesaj bulunamadı."
+      }, 400);
     }
+
+    // =========================
+    // GROQ API KEY
+    // =========================
 
     const apiKey = process.env.GROQ_API_KEY;
 
@@ -31,134 +110,249 @@ export default async (req) => {
       }, 500);
     }
 
-    const recentMessages = messages.slice(-12);
+    // =========================
+    // DEVAM ET KONTROLÜ
+    // =========================
 
-    const hasImage = recentMessages.some(
-      m => m?.role === "user" &&
-      typeof m.image === "string" &&
-      m.image.startsWith("data:image/")
+    const continuing = body.continuation === true;
+
+    // Son mesajları alarak token tüketimini azalt.
+    const recentMessages = body.messages.slice(
+      continuing ? -9 : -8
     );
 
-    const memoryText = [
-      memory.name
-        ? "Kullanıcının adı: " + String(memory.name).slice(0, 20)
-        : "",
-      Array.isArray(memory.preferences)
-        ? "Tercihler: " + memory.preferences.slice(0, 10)
-            .map(x => String(x).slice(0, 150)).join(", ")
-        : "",
-      Array.isArray(memory.long_memory)
-        ? "Hatırlanan bilgiler: " + memory.long_memory.slice(0, 30)
-            .map(x => String(x).slice(0, 200)).join("; ")
-        : "",
-      "Dil: " + String(memory.language || "tr").slice(0, 30)
-    ].filter(Boolean).join("\n");
+    // =========================
+    // HAFIZA
+    // =========================
 
-    const today = new Date().toISOString().slice(0, 10);
+    const memory =
+      body.memory &&
+      typeof body.memory === "object"
+        ? body.memory
+        : {};
+
+    const name = safeName(memory.name);
+
+    const preferences = Array.isArray(memory.preferences)
+      ? memory.preferences
+          .slice(0, 6)
+          .map(x => String(x).slice(0, 90))
+          .join("; ")
+      : "";
+
+    const longMemory = Array.isArray(memory.long_memory)
+      ? memory.long_memory
+          .slice(0, 8)
+          .map(x => String(x).slice(0, 100))
+          .join("; ")
+      : "";
+
+    const language = String(
+      memory.language || "tr"
+    ).slice(0, 15);
+
+    // =========================
+    // SİSTEM TALİMATLARI
+    // =========================
 
     const systemMessage = {
       role: "system",
       content: `
 Sen BeyinX adlı Türkçe yapay zekâ asistanısın.
-Bugünün tarihi: ${today}.
 
-GENEL KURALLAR:
-- Doğal, samimi ve anlaşılır konuş.
-- Kullanıcı kısa sorarsa kısa, ayrıntı isterse ayrıntılı cevap ver.
-- Gereksiz girişleri ve tekrarları azalt.
-- Kullanıcının diline uyum sağla.
-- Emin olmadığın bilgileri kesinmiş gibi sunma.
-- Güncel bilgiye erişimin yoksa bunu açıkça söyle.
+Bugünün tarihi:
+${new Date().toISOString().slice(0, 10)}
+
+KİMLİK:
 - BeyinX'in kurucusu sorulursa Ömer olduğunu söyle.
-- Kullanıcının hafızasındaki bilgileri gerektiğinde kullan.
-- Hafızada olmayan kişisel bilgileri uydurma.
+- Kullanıcıyla doğal ve samimi konuş.
+- Kullanıcının diline uyum sağla.
+- Kısa sorulara kısa cevap ver.
+- Detaylı sorulara açıklayıcı cevap ver.
+- Bilmediğin şeyleri uydurma.
+- Güncel bilgiye erişimin yoksa belirt.
 
-ÖDEV VE MATEMATİK:
-- Kullanıcı ödev çözmeni isterse soruları sırayla çöz.
-- Önce soruyu doğru okuduğundan emin ol.
-- Görsel bulanıksa rakam veya işlem uydurma.
-- Okunamayan bölümü açıkça belirt.
-- Okuyabildiğin soruları çözmeye devam et.
-- Çözümleri öğrencinin anlayabileceği sade Türkçeyle yaz.
-- Her soru için önce kısa işlem, ardından net sonuç ver.
-- Gereksiz uzun açıklamalardan kaçın.
-- Soruların tamamını mümkün olduğunca yanıtla.
-- Cevap uzunsa mantıklı bir yerde dur ve
-  "Devamı için Devam et yaz." de.
-- Cevabı bir cümlenin veya işlemin ortasında kesme.
-- Matematik ifadelerini mümkün olduğunca
-  okunabilir düz metinle göster.
-- Örneğin karekök için √, çarpma için × kullan.
+SAYGILI KONUŞMA:
+- Kullanıcıya hakaret etme.
+- Uygunsuz lakaplarla hitap etme.
+- Kullanıcının ismi uygunsuzsa kullanma.
+- Her zaman saygılı ve yardımcı ol.
+
+YAZI BİÇİMLERİ:
+- Gerektiğinde Markdown kullan.
+- Başlıkları düzgün oluştur.
+- Önemli ifadeleri kalın yazabilirsin.
+- Listeleri anlaşılır biçimde hazırla.
+- Gereksiz semboller kullanma.
+- Kod istenirse kod bloğu kullan.
+- Matematikte mümkün olduğunca
+  √, × ve ÷ işaretlerini tercih et.
 - Gereksiz LaTeX komutları kullanma.
-- Kesirleri gerektiğinde (a/b) biçiminde yaz.
-- Matematik işlemlerinin doğruluğunu kontrol et.
+
+ÖDEV ÇÖZME:
+- Soruları sırayla çöz.
+- Fotoğraftaki yazıları dikkatlice incele.
+- Görselde olmayan sorular üretme.
+- Okunmayan sayıları tahmin etme.
+- Belirsiz kısımları açıkça belirt.
+- Kısa ve anlaşılır işlemler göster.
+- Her sorunun sonucunu açıkça yaz.
+- Gereksiz uzun açıklamalardan kaçın.
+- Soruları mümkün olduğunca tamamla.
+- Matematik işlemlerini kontrol et.
 
 GÖRSEL ANALİZ:
-- Gönderilen fotoğrafı dikkatlice incele.
-- Görselde gerçekten bulunan içerikten söz et.
-- Fotoğrafı görmediysen gördüğünü iddia etme.
-- Görselde olmayan sorular, sayılar veya metinler üretme.
-- Sorular çoksa numara sırasını koru.
-- Belirsiz karakterleri tahmin etmek yerine belirt.
-- Kullanıcıdan aynı görseli gereksiz yere yeniden isteme.
+- Gerçekten gördüğün şeyleri açıkla.
+- Görseli göremiyorsan uydurma.
+- Fotoğrafta olmayan bilgi ekleme.
+- Görseldeki soru numaralarını koru.
+- Bulanık bölümleri belirt.
 
-KOD VE TEKNİK:
-- HTML, JavaScript ve Minecraft gibi konularda
-  uygulanabilir çözümler üret.
-- Kullanıcı tam kod isterse eksik parça bırakma.
-- Mevcut özellikleri korumak önemliyse bunu gözet.
+DEVAM ET:
+- Kullanıcı devam etmek istiyorsa
+  kaldığın yerden sürdür.
+- Önceki cevapları tekrar etme.
+- Eksik kalan bütün soruları çözmeye çalış.
+- Cevabı gereksiz yere bölme.
+- Sırf uzun diye kendiliğinden durma.
+- Bir işlemin ortasında durmamaya çalış.
+- Devam ederken yeni bir giriş yazma.
+- Doğrudan eksik kalan bölümden başla.
+
+TEKNİK KONULAR:
+- HTML, JavaScript ve Minecraft
+  gibi konularda yardımcı ol.
+- Kullanıcı tam kod isterse
+  mümkün olduğunca eksiksiz kod ver.
+- Mevcut özellikleri korumaya çalış.
 
 KULLANICI HAFIZASI:
-${memoryText}
+İsim: ${name}
+Tercihler: ${preferences}
+Uzun hafıza: ${longMemory}
+Dil: ${language}
+
+Hafızada olmayan kişisel bilgileri uydurma.
 `
     };
 
-    const cleanMessages = [
-      systemMessage,
-      ...recentMessages.map(m => {
-        const role = m.role === "ai" || m.role === "assistant"
+    // =========================
+    // GÖRSEL KONTROLÜ
+    // =========================
+
+    let lastImageIndex = -1;
+
+    for (let i = 0; i < recentMessages.length; i++) {
+      const message = recentMessages[i];
+
+      if (
+        message?.role === "user" &&
+        validImage(message.image)
+      ) {
+        lastImageIndex = i;
+      }
+    }
+
+    // =========================
+    // MESAJLARI HAZIRLA
+    // =========================
+
+    const cleanMessages = [systemMessage];
+
+    for (let i = 0; i < recentMessages.length; i++) {
+
+      const message = recentMessages[i] || {};
+
+      const role =
+        message.role === "ai" ||
+        message.role === "assistant"
           ? "assistant"
           : "user";
 
-        const text = String(m.text || "").slice(0, 5000);
+      const text = String(
+        message.text || ""
+      ).slice(
+        0,
+        continuing ? 4200 : 3000
+      );
 
-        const image = role === "user" &&
-          typeof m.image === "string" &&
-          /^data:image\/(?:jpeg|jpg|png|webp);base64,/i.test(m.image) &&
-          m.image.length <= 2500000
-            ? m.image
-            : null;
+      if (
+        role === "user" &&
+        i === lastImageIndex
+      ) {
 
-        if (image) {
-          return {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: text || "Bu görseli dikkatlice analiz et."
-              },
-              {
-                type: "image_url",
-                image_url: { url: image }
+        cleanMessages.push({
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text:
+                text ||
+                "Bu görseli dikkatlice analiz et."
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: message.image
               }
-            ]
-          };
-        }
+            }
+          ]
+        });
 
-        return { role, content: text };
-      })
-    ];
+      } else {
+
+        cleanMessages.push({
+          role,
+          content: text || " "
+        });
+
+      }
+    }
+
+    // =========================
+    // DEVAM ET TALİMATI
+    // =========================
+
+    if (continuing) {
+
+      cleanMessages.push({
+        role: "user",
+        content:
+          "Kaldığın yerden devam et. " +
+          "Önceki cevapları tekrarlama. " +
+          "Henüz cevaplanmamış soruları " +
+          "mümkün olduğunca tamamla. " +
+          "Doğrudan kaldığın yerden başla."
+      });
+
+    }
+
+    // =========================
+    // MODEL SEÇİMİ
+    // =========================
+
+    const hasImage = lastImageIndex >= 0;
 
     const model = hasImage
       ? "qwen/qwen3.8-27b"
       : "openai/gpt-oss-120b";
 
+    // =========================
+    // KREDİ TASARRUFU
+    // =========================
+
+    const maxTokens = continuing ? 2200 : 1500;
+
     const requestBody = {
       model,
       messages: cleanMessages,
-      temperature: 0.3,
-      max_completion_tokens: 3500
+      temperature: 0.25,
+      max_completion_tokens: maxTokens
     };
+
+    // =========================
+    // GROQ İSTEĞİ
+    // =========================
 
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -166,71 +360,103 @@ ${memoryText}
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
+          Authorization: `Bearer ${apiKey}`
         },
         body: JSON.stringify(requestBody)
       }
     );
 
-    let data;
+    const data = await response.json().catch(() => ({}));
 
-    try {
-      data = await response.json();
-    } catch {
-      return json({
-        error: "Sunucudan geçersiz cevap geldi."
-      }, 502);
-    }
+    // =========================
+    // KULLANIM SINIRI
+    // =========================
 
     if (response.status === 429) {
+
       const retryAfter = Number(
         response.headers.get("retry-after")
       );
 
-      const wait = Number.isFinite(retryAfter) && retryAfter > 0
-        ? `${Math.ceil(retryAfter)} saniye`
-        : "biraz";
+      const wait =
+        Number.isFinite(retryAfter) && retryAfter > 0
+          ? `${Math.ceil(retryAfter)} saniye`
+          : "bir süre";
 
       return json({
-        error: `BeyinX şu anda yoğun. ${wait} bekleyip tekrar dene.`
+        error:
+          "BeyinX kullanım sınırına ulaştı. " +
+          `${wait} bekleyip tekrar dene.`,
+        retry_after:
+          Number.isFinite(retryAfter) && retryAfter > 0
+            ? Math.ceil(retryAfter)
+            : null
       }, 429);
     }
 
+    // =========================
+    // API HATALARI
+    // =========================
+
     if (!response.ok) {
-      console.error("Groq API hatası:", data?.error);
+
+      console.error(
+        "Groq API hatası:",
+        response.status,
+        data?.error?.message
+      );
 
       return json({
-        error: data?.error?.message ||
-          "BeyinX bağlantısında geçici bir sorun oluştu."
-      }, response.status);
+        error:
+          "BeyinX şu anda cevap veremedi. " +
+          "Biraz sonra tekrar dene."
+      }, response.status >= 500 ? 502 : response.status);
     }
 
+    // =========================
+    // YAPAY ZEKÂ CEVABI
+    // =========================
+
     const choice = data?.choices?.[0];
-    const answer = String(choice?.message?.content || "").trim();
+
+    const answer = String(
+      choice?.message?.content || ""
+    ).trim();
 
     if (!answer) {
       return json({
-        error: "BeyinX cevap oluşturamadı. Tekrar dene."
+        error:
+          "BeyinX cevap oluşturamadı. Tekrar dene."
       }, 502);
     }
 
-    const truncated = choice?.finish_reason === "length";
+    const truncated =
+      choice?.finish_reason === "length";
+
+    // =========================
+    // BAŞARILI CEVAP
+    // =========================
 
     return json({
-      output_text: answer +
-        (truncated
-          ? "\n\nYanıt sınırına ulaşıldı. Devam et yazarak sürdürebilirsin."
-          : ""),
-      web_used: false,
+      output_text: answer,
+      truncated,
       image_used: hasImage,
-      truncated
+      web_used: false
     });
 
   } catch (error) {
-    console.error("BeyinX backend error:", error);
+
+    console.error(
+      "BeyinX backend error:",
+      error
+    );
 
     return json({
-      error: "BeyinX bağlantısında beklenmeyen bir sorun oluştu. Biraz sonra tekrar dene."
+      error:
+        "BeyinX bağlantısında beklenmeyen " +
+        "bir sorun oluştu."
     }, 500);
+
   }
+
 };
