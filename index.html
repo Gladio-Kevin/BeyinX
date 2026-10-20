@@ -111,7 +111,8 @@ background:linear-gradient(135deg,#6366f1,#8b5cf6);
 
 #app{
 display:none;
-height:100vh;
+height:100dvh;
+min-height:0;
 flex-direction:column;
 }
 
@@ -182,8 +183,13 @@ background:#f59e0b;
 }
 
 .chatWrapper{
-flex:1;
+flex:1 1 0%;
+min-height:0;
+height:0;
 overflow-y:auto;
+overflow-x:hidden;
+touch-action:pan-y;
+overscroll-behavior:contain;
 padding:20px 13px 180px;
 }
 
@@ -2201,58 +2207,69 @@ document.getElementById("imagePreview")
 
 let recognition=null;
 let listening=false;
+let voiceBaseText="";
+let voiceFinalText="";
 
 function toggleVoice(){
-
-const SpeechRecognition =
-window.SpeechRecognition ||
-window.webkitSpeechRecognition;
-
-if(!SpeechRecognition){
-showToast("Bu Chrome sürümünde sesli yazma desteklenmiyor.");
-return;
-}
-
-if(listening){
-recognition.stop();
-return;
-}
-
-recognition=new SpeechRecognition();
-recognition.lang="tr-TR";
-recognition.interimResults=true;
-recognition.continuous=false;
-
-recognition.onstart=()=>{
-listening=true;
-document.getElementById("voiceBtn").textContent="⏹️";
-setStatus("Dinliyor...",true);
-};
-
-recognition.onresult=(event)=>{
-let result="";
-
-for(let i=event.resultIndex;i<event.results.length;i++){
-result += event.results[i][0].transcript;
-}
-
-document.getElementById("messageInput").value=result;
-};
-
-recognition.onerror=()=>{
-listening=false;
-document.getElementById("voiceBtn").textContent="🎙️";
-setStatus("Hazır");
-showToast("Ses algılanamadı.");
-};
-
-recognition.onend=()=>{
-listening=false;
-document.getElementById("voiceBtn").textContent="🎙️";
-setStatus("Hazır");
-};
-
-recognition.start();
+  const SpeechAPI=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const btn=document.getElementById("voiceBtn");
+  const input=document.getElementById("messageInput");
+  if(!SpeechAPI){
+    showToast("Bu tarayıcıda sesli yazma desteklenmiyor. Chrome ile dene.");
+    return;
+  }
+  if(listening && recognition){
+    recognition.stop();
+    return;
+  }
+  try{
+    recognition=new SpeechAPI();
+    recognition.lang="tr-TR";
+    recognition.interimResults=true;
+    recognition.continuous=false;
+    recognition.maxAlternatives=1;
+    voiceBaseText=input.value.trim();
+    voiceFinalText="";
+    recognition.onstart=()=>{
+      listening=true;
+      btn.textContent="⏹️";
+      setStatus("Dinliyor...",true);
+    };
+    recognition.onresult=(event)=>{
+      let interim="";
+      let final="";
+      for(let i=0;i<event.results.length;i++){
+        const phrase=event.results[i][0]?.transcript||"";
+        if(event.results[i].isFinal) final+=phrase+" ";
+        else interim+=phrase;
+      }
+      voiceFinalText=final.trim();
+      input.value=[voiceBaseText,voiceFinalText,interim].filter(Boolean).join(" ").trim();
+      input.dispatchEvent(new Event("input",{bubbles:true}));
+    };
+    recognition.onerror=(event)=>{
+      const messages={
+        "not-allowed":"Mikrofon izni kapalı. Chrome site izinlerinden mikrofonu aç.",
+        "service-not-allowed":"Ses tanıma hizmetine izin verilmedi.",
+        "no-speech":"Ses duyulmadı. Tekrar deneyebilirsin.",
+        "audio-capture":"Mikrofon kullanılamıyor. Telefon izinlerini kontrol et.",
+        "network":"Ses tanıma bağlantısı kurulamadı. İnternetini kontrol et."
+      };
+      showToast(messages[event.error]||"Sesli yazma hatası: "+(event.error||"bilinmiyor"));
+    };
+    recognition.onend=()=>{
+      listening=false;
+      btn.textContent="🎙️";
+      setStatus("Hazır");
+      recognition=null;
+    };
+    recognition.start();
+  }catch(error){
+    listening=false;
+    btn.textContent="🎙️";
+    setStatus("Hazır");
+    showToast("Mikrofon başlatılamadı. İzinleri kontrol et.");
+  }
 }
 
 /*
