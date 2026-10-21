@@ -4,9 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#6366f1">
-<meta name="description" content="BeyinX - Yapay zeka sohbet uygulaması">
+<meta name="description" content="BeyinX, Türkçe yapay zeka sohbet uygulaması. Çoklu sohbet, uzun süreli hafıza, görsel analizi ve sesli giriş. Ücretsiz dene, telefonuna uygulama olarak yükle.">
+<link rel="canonical" href="https://beyinx-ai.netlify.app/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BeyinX - Türkçe Yapay Zeka Sohbet Uygulaması">
+<meta property="og:description" content="Çoklu sohbet, uzun süreli hafıza, görsel analizi ve sesli giriş olan Türkçe yapay zeka sohbet uygulaması.">
+<meta property="og:url" content="https://beyinx-ai.netlify.app/">
 <link rel="manifest" href="/manifest.webmanifest">
-<title>BeyinX</title>
+<title>BeyinX - Türkçe Yapay Zeka Sohbet Uygulaması</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
@@ -22,6 +27,7 @@ padding:0
 body{
 font-family:Arial,sans-serif;
 height:100vh;
+height:100dvh;
 overflow:hidden;
 color:#171827;
 background:
@@ -38,6 +44,7 @@ cursor:pointer;
 #nameScreen{
 position:fixed;
 inset:0;
+overflow-y:auto;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -50,6 +57,7 @@ z-index:9999;
 }
 
 .nameBox{
+margin:auto;
 width:100%;
 max-width:390px;
 background:rgba(255,255,255,.88);
@@ -82,6 +90,25 @@ font-weight:800;
 color:#7b8090;
 font-size:14px;
 margin:8px 0 20px;
+}
+
+.nameAbout{
+margin-top:22px;
+padding-top:16px;
+border-top:1px solid #e6e8f0;
+text-align:left;
+font-size:13px;
+line-height:1.55;
+color:#5d6272;
+}
+
+.nameAbout ul{
+list-style:none;
+margin-top:8px;
+}
+
+.nameAbout li{
+margin:3px 0;
 }
 
 #nameInput,
@@ -425,6 +452,7 @@ top:0;
 left:-310px;
 width:290px;
 height:100vh;
+height:100dvh;
 background:rgba(255,255,255,.97);
 z-index:30;
 transition:.25s;
@@ -719,9 +747,9 @@ font-size:13px;
 
 <div class="nameBrain">🧠</div>
 
-<div class="nameLogo">
+<h1 class="nameLogo">
 BeyinX
-</div>
+</h1>
 
 <div class="nameTitle">
 İsim koy
@@ -743,6 +771,17 @@ class="nameContinue"
 onclick="saveName()">
 Devam et
 </button>
+
+<div class="nameAbout">
+<p><strong>BeyinX</strong>, Türkçe konuşan yapay zeka sohbet uygulamasıdır. Sorularını yaz, fotoğraf gönder ya da sesli konuş.</p>
+<ul>
+<li>💬 Birden fazla sohbet açıp yönet</li>
+<li>🧠 "Bunu hatırla: ..." diyerek uzun süreli hafıza kullan</li>
+<li>🖼️ Görsel yükleyip analiz ettir</li>
+<li>🎙️ Sesli giriş</li>
+<li>📲 Telefona uygulama gibi yükle</li>
+</ul>
+</div>
 
 </div>
 
@@ -1053,10 +1092,15 @@ Tamam ✓
 let username =
 localStorage.getItem("beyinx_username");
 
-let chats =
-JSON.parse(
+let chats = [];
+try{
+chats = JSON.parse(
 localStorage.getItem("beyinx_chats") || "[]"
 );
+if(!Array.isArray(chats)) chats = [];
+}catch{
+chats = [];
+}
 
 let currentChat = null;
 
@@ -1074,8 +1118,9 @@ let deferredInstallPrompt = null;
 function validBeyinXName(value){
  const name=String(value||"").trim();
  if(!name || name.length>20 || !/^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]{1,20}$/u.test(name)) return false;
- const n=name.toLocaleLowerCase("tr-TR").replace(/\s+/g,"").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ü/g,"u").replace(/ğ/g,"g").replace(/ş/g,"s").replace(/ç/g,"c");
- return !["amk","orospu","siktir","sik","yarrak","yarak","pic","got","bok","fuck","bitch","amcik","pezevenk","ibne","salak","aptal","gerizekali","gavat"].some(x=>n.includes(x));
+ const words=name.toLocaleLowerCase("tr-TR").split(/\s+/).map(w=>w.replace(/ı/g,"i").replace(/ö/g,"o").replace(/ü/g,"u").replace(/ğ/g,"g").replace(/ş/g,"s").replace(/ç/g,"c"));
+ const exact=["amk","orospu","siktir","sik","yarrak","yarak","pic","got","bok","fuck","bitch","amcik","pezevenk","ibne","salak","aptal","gerizekali","gavat"];
+ return !words.some(w=>exact.includes(w));
 }
 if(username && !validBeyinXName(username)){
  username=null;
@@ -2371,10 +2416,30 @@ sendMessage();
 
 function saveChats(){
 
+try{
 localStorage.setItem(
 "beyinx_chats",
 JSON.stringify(chats)
 );
+}catch{
+try{
+const slim=chats.map(c=>({
+...c,
+messages:(c.messages||[]).map(m=>{
+if(!m.image)return m;
+const {image,...rest}=m;
+return {...rest,imageRemoved:true};
+})
+}));
+localStorage.setItem(
+"beyinx_chats",
+JSON.stringify(slim)
+);
+showToast("Depolama dolu: görseller kaydedilmedi.");
+}catch{
+showToast("Sohbet kaydedilemedi, depolama dolu.");
+}
+}
 
 }
 
@@ -2462,6 +2527,25 @@ chat.id,
 
 item.addEventListener(
 "touchend",
+()=>{
+
+clearTimeout(timer);
+
+}
+);
+
+item.addEventListener(
+"touchmove",
+()=>{
+
+clearTimeout(timer);
+
+},
+{passive:true}
+);
+
+item.addEventListener(
+"touchcancel",
 ()=>{
 
 clearTimeout(timer);
@@ -2714,6 +2798,13 @@ document
 /* ÇIKIŞ */
 
 function logout(){
+
+if(confirm("Çıkış yaparken sohbetler ve hafıza bu cihazdan da silinsin mi?\n\nTamam: hepsini sil\nİptal: sadece çıkış yap")){
+localStorage.removeItem("beyinx_chats");
+localStorage.removeItem("beyinx_long_memory");
+localStorage.removeItem("beyinx_preferences");
+chats=[];
+}
 
 localStorage.removeItem(
 "beyinx_username"
